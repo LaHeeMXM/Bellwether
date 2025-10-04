@@ -7,8 +7,16 @@ public class CombatManager : MonoBehaviour
 {
     public static CombatManager Instance;
 
-    public CombatantData playerData;
-    public CombatantData enemyData;
+    // 玩家蛇头
+    public CombatantData playerHeadData;
+    // 敌人蛇头
+    public CombatantData enemyHeadData;
+    // 被攻击的身体节点数据
+    public CombatantData targetNodeData;
+
+
+    public bool isTargetNodePlayer;
+
 
     void Awake()
     {
@@ -23,13 +31,18 @@ public class CombatManager : MonoBehaviour
         }
     }
 
-    public void StartCombat(CombatantData player, CombatantData enemy)
+
+    public void StartCombat( 
+        CombatantData playerHead,
+        CombatantData enemyHead,
+        CombatantData target,
+        bool targetIsPlayer)
     {
-        Debug.Log(player.unitName + " vs " + enemy.unitName);
+        this.playerHeadData = playerHead;
+        this.enemyHeadData = enemyHead;
+        this.targetNodeData = target;
+        this.isTargetNodePlayer = targetIsPlayer;
 
-        this.playerData = player;
-        this.enemyData = enemy;
-
-        SceneManager.LoadScene("CombatScene"); 
+        SceneManager.LoadScene("CombatScene");
     }
 }

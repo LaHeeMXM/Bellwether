@@ -60,10 +60,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acc2e314a5f57ef4aa987347153a2049, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  headForwardSpeed: 5
-  headRotationSpeed: 150
-  bodyFollowRate: 10
-  absoluteNodeSpacing: 1
+  headForwardSpeed: 3
+  headRotationSpeed: 30
+  bodyFollowRate: 3
+  absoluteNodeSpacing: 2
   defaultNodePrefab: {fileID: 6555786559354867229, guid: 30c522ea29873514a9d00a8055fbf2f6, type: 3}
 --- !u!1 &9210187664081290384
 GameObject:
@@ -588,7 +588,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 81a6c471c16a72e449db911b680aa2dd, type: 2}
+  - {fileID: 2100000, guid: 8a197b663e1790e41a48e0defe752fd5, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1115,7 +1115,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 81a6c471c16a72e449db911b680aa2dd, type: 2}
+  - {fileID: 2100000, guid: 8a197b663e1790e41a48e0defe752fd5, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4186,7 +4186,7 @@ GameObject:
   - component: {fileID: 9210187666104588921}
   - component: {fileID: 9210187666104588920}
   m_Layer: 0
-  m_Name: SK_Goat_white
+  m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4217,7 +4217,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9210187666104588924}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Avatar: {fileID: 9000000, guid: 37ab5ee15ddf4eb4d85c2d2b26fc8276, type: 3}
   m_Controller: {fileID: 9100000, guid: 1215e98cc02a91340b3a9af5af091f14, type: 2}
   m_CullingMode: 1
@@ -4237,7 +4237,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9210187666104588924}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7e5010bff315c6e4c8a413f69e3d6458, type: 3}
   m_Name: 

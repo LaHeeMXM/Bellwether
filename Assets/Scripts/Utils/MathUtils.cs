@@ -4,7 +4,6 @@ using UnityEngine;
 namespace Yummy{
 public static class MathUtils
 {
-
     
     /// <summary>
     /// 根据索引数组对数据数组进行重新排序。

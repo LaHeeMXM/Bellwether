@@ -13,20 +13,18 @@ public class BattleInitializer : MonoBehaviour
         CombatantData playerHeadData = CombatManager.Instance.playerHeadData;
         CombatantData enemyHeadData = CombatManager.Instance.enemyHeadData;
         CombatantData targetNodeData = CombatManager.Instance.targetNodeData;
-
         bool isTargetPlayer = CombatManager.Instance.isTargetNodePlayer;
 
 
-        if (isTargetPlayer)
-        {
-            GameObject playerUnit = Instantiate(targetNodeData.unitPrefab, playPoint.position, playPoint.rotation);
-            GameObject enemyUnit = Instantiate(enemyHeadData.unitPrefab, enemyPoint.position, enemyPoint.rotation);
-        }
+        CombatantData playerDataForBattle = isTargetPlayer ? targetNodeData : playerHeadData;
+        CombatantData enemyDataForBattle = isTargetPlayer ? enemyHeadData : targetNodeData;
 
-        else
-        {
-            GameObject playerUnit = Instantiate(playerHeadData.unitPrefab, playPoint.position, playPoint.rotation);
-            GameObject enemyUnit = Instantiate(targetNodeData.unitPrefab, enemyPoint.position, enemyPoint.rotation);
-        }
+
+        GameObject playerUnit = Instantiate(playerDataForBattle.unitPrefab, playPoint.position, playPoint.rotation);
+        GameObject enemyUnit = Instantiate(enemyDataForBattle.unitPrefab, enemyPoint.position, enemyPoint.rotation);
+
+
+        TurnBasedManager.Instance.StartBattle(playerUnit, playerDataForBattle, enemyUnit, enemyDataForBattle, !isTargetPlayer);
+
     }
 }

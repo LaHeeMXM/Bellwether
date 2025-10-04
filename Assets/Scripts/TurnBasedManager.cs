@@ -7,24 +7,23 @@ public class TurnBasedManager : MonoBehaviour
 {
     public static TurnBasedManager Instance;
 
-    private GameObject playerUnitModel;
-    private GameObject enemyUnitModel;
-    private bool isPlayerFirst;
+    public  GameObject playerUnitModel;
+    public  GameObject enemyUnitModel;
+    public  bool isPlayerFirst;
 
-    private class BattleUnit
+    public  class BattleUnit
     {
         public string unitName;
         public int Health;
         public int Attack;
         public int Defense;
     }
-    private BattleUnit playerBattleData;
-    private BattleUnit enemyBattleData;
+    public  BattleUnit playerBattleData;
+    public  BattleUnit enemyBattleData;
 
 
-
-    private enum BattleState { START, PLAYERTURN, ENEMYTURN, WON, LOST, PAUSED }
-    private BattleState currentState;
+    public  enum BattleState { START, PLAYERTURN, ENEMYTURN, WON, LOST, PAUSED }
+    public  BattleState currentState;
 
     void Awake()
     {

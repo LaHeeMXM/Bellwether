@@ -34,9 +34,10 @@ public class SnakeHead : MonoBehaviour
     
     void Update()
     {
+        if (GetComponent<PlayerController>() == null) return;
+
         // 获取输入量 (move: W, rotate: A/D)
         (float moveInput, float rotateInput) = HandleInput();
-        
         UpdateHead(moveInput, rotateInput);
         UpdateBodyPositions();
         

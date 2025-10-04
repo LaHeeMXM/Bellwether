@@ -47,7 +47,8 @@ public class BattleNode : MonoBehaviour
     public Action<BattleHead> onRemove;
 
     ShowUnitInfo _showUnitInfo;
-
+    int _index = 0;
+    BattleHead _head;
     public void CaculateAttribute(BattleHead head, int index)
     {
         var nodeList = head.GetList();
@@ -65,14 +66,14 @@ public class BattleNode : MonoBehaviour
         finalAttribute.Defense += selfBonus.Defense;
 
         _showUnitInfo.SetData(finalAttribute);
-        
-        Debug.Log("CaculateAttribute:"+"Level" + Level + ","+ finalAttribute.Attack + "," + finalAttribute.Health + "," + finalAttribute.Defense);
+        _index = index;
+        Debug.Log("CaculateAttribute:" + "Level" + Level + "," + finalAttribute.Attack + "," + finalAttribute.Health + "," + finalAttribute.Defense);
     }
     void Update()
     {
 
-         _showUnitInfo.gameObject.SetActive(Input.GetKey(KeyCode.LeftShift));
-        
+        _showUnitInfo.gameObject.SetActive(Input.GetKey(KeyCode.LeftShift));
+
     }
 
     void Awake()
@@ -81,4 +82,29 @@ public class BattleNode : MonoBehaviour
         Level = 1;
     }
 
+    public CombatantData GetCombatantData()
+    {
+        CombatantData data = new CombatantData();
+        data.Attack = finalAttribute.Attack;
+        data.Defense = finalAttribute.Defense;
+        data.Health = finalAttribute.Health;
+        data.Level = Level;
+        int assistance = 0;
+        int k = 2;
+        for (int i = _index; i < _head.GetList().Count; i++)
+        {
+            assistance += _head.GetList()[i].finalAttribute.Attack / k;
+            k *= 2;
+        }
+        data.Assistance = assistance;
+        return data;
+    }
+    public BattleNode GetHeadNode()
+    {
+        return _head.GetComponent<BattleNode>();
+    }
+    public bool IsHead()
+    {
+        return (GetComponent<BattleHead>() != null);
+    }
 }

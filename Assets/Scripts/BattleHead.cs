@@ -32,7 +32,6 @@ public class BattleHead : MonoBehaviour
 
         var node = snakeHead.AddNode();
         node.SetModel(newNode.gameObject);
-
         UpdateNodes();
     }
 

@@ -26,7 +26,6 @@ public class UnitAttribute
 
 public class BattleNode : MonoBehaviour
 {
-    public CombatantData data;
     //基础属性
     [SerializeField]
     private UnitAttribute baseAttribute;
@@ -66,11 +65,14 @@ public class BattleNode : MonoBehaviour
         finalAttribute.Defense += selfBonus.Defense;
 
         _showUnitInfo.SetData(finalAttribute);
+        
+        Debug.Log("CaculateAttribute:"+"Level" + Level + ","+ finalAttribute.Attack + "," + finalAttribute.Health + "," + finalAttribute.Defense);
     }
 
     void Awake()
     {
-        _showUnitInfo = GetComponent<ShowUnitInfo>();
+        _showUnitInfo = GetComponentInChildren<ShowUnitInfo>();
+        Level = 1;
     }
 
 }

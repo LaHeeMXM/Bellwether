@@ -15,7 +15,6 @@ public class ShowUnitInfo : MonoBehaviour
         attackLabel = transform.Find("label_attack").GetComponent<VinoLabel>();
         healthLabel = transform.Find("label_health").GetComponent<VinoLabel>();
         defenseLabel = transform.Find("label_defense").GetComponent<VinoLabel>();
-        
     }
 
     public void SetData(UnitAttribute data)

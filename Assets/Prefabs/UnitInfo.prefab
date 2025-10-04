@@ -12,8 +12,7 @@ GameObject:
   - component: {fileID: 1491031056226238103}
   - component: {fileID: 7599343430330570450}
   - component: {fileID: 2776384094018282718}
-  - component: {fileID: 9185346744396974793}
-  - component: {fileID: 3826589424029807463}
+  - component: {fileID: 719590469589187217}
   m_Layer: 5
   m_Name: UnitInfo
   m_TagString: Untagged
@@ -88,7 +87,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!114 &2776384094018282718
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -106,27 +105,7 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!1183024399 &9185346744396974793
-LookAtConstraint:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1604869211614790147}
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Weight: 1
-  m_RotationAtRest: {x: 0, y: 0, z: 0}
-  m_RotationOffset: {x: 0, y: 0, z: 0}
-  m_Roll: -90
-  m_WorldUpObject: {fileID: 0}
-  m_UseUpObject: 0
-  m_Active: 1
-  m_IsLocked: 1
-  m_Sources:
-  - sourceTransform: {fileID: 0}
-    weight: 1
---- !u!114 &3826589424029807463
+--- !u!114 &719590469589187217
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

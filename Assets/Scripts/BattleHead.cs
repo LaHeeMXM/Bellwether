@@ -9,7 +9,9 @@ public class BattleHead : MonoBehaviour
     {
         snakeHead = GetComponent<SnakeHead>();
     }
-
+    void Start()
+    {
+    }
     //Test
     void Update()
     {
@@ -24,14 +26,18 @@ public class BattleHead : MonoBehaviour
     {
         nodeList.Add(newNode);
         newNode.onAdd?.Invoke(this, nodeList.Count - 1);
+
         var node = snakeHead.AddNode();
         node.SetModel(newNode.gameObject);
+
+        UpdateNodes();
     }
 
     public void RemoveNode(BattleNode node)
     {
         nodeList.Remove(node);
         node.onRemove?.Invoke(this);
+        UpdateNodes();
     }
 
     //清除指定索引以及之后的所有节点
@@ -41,6 +47,7 @@ public class BattleHead : MonoBehaviour
         //只触发指定节点的离队事件
         nodeList[index].onRemove?.Invoke(this);
         nodeList.RemoveRange(index, nodeList.Count - index);
+        UpdateNodes();
     }
 
     public List<BattleNode> GetList()
@@ -57,7 +64,6 @@ public class BattleHead : MonoBehaviour
         for (int i = 0; i < nodeList.Count; i++)
         {
             nodeList[i].CaculateAttribute(this, i);
-            
         }
     }
     

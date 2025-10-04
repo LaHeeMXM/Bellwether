@@ -68,6 +68,12 @@ public class BattleNode : MonoBehaviour
         
         Debug.Log("CaculateAttribute:"+"Level" + Level + ","+ finalAttribute.Attack + "," + finalAttribute.Health + "," + finalAttribute.Defense);
     }
+    void Update()
+    {
+
+         _showUnitInfo.gameObject.SetActive(Input.GetKey(KeyCode.LeftShift));
+        
+    }
 
     void Awake()
     {

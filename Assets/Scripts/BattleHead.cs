@@ -9,20 +9,23 @@ public class BattleHead : MonoBehaviour
     {
         snakeHead = GetComponent<SnakeHead>();
     }
-    void Start()
-    {
-    }
-    //Test
+
+    //OnlyTest
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.T))
         { 
-            var newNode = Instantiate(Resources.Load<GameObject>("Sheep01"));
-            AddNode(newNode.GetComponent<BattleNode>());
+            AddSheep("Sheep01");
         }
     }
 
-    public void AddNode(BattleNode newNode)
+    public void AddSheep(string sheepName)
+    {
+        var newNode = Instantiate(Resources.Load<GameObject>(sheepName));
+        AddNode(newNode.GetComponent<BattleNode>());
+    }
+
+    private void AddNode(BattleNode newNode)
     {
         nodeList.Add(newNode);
         newNode.onAdd?.Invoke(this, nodeList.Count - 1);

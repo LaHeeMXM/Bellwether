@@ -9,17 +9,31 @@ public class BattleHead : MonoBehaviour
     {
         snakeHead = GetComponent<SnakeHead>();
     }
+
+    //Test
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.T))
+        { 
+            var newNode = Instantiate(Resources.Load<GameObject>("Sheep01"));
+            AddNode(newNode.GetComponent<BattleNode>());
+        }
+    }
+
     public void AddNode(BattleNode newNode)
     {
         nodeList.Add(newNode);
         newNode.onAdd?.Invoke(this, nodeList.Count - 1);
-        snakeHead.AddNode(newNode.modelPrefab);
+        var node = snakeHead.AddNode();
+        node.SetModel(newNode.gameObject);
     }
+
     public void RemoveNode(BattleNode node)
     {
         nodeList.Remove(node);
         node.onRemove?.Invoke(this);
     }
+
     //清除指定索引以及之后的所有节点
     public void ClearNodes(int index)
     {
@@ -42,8 +56,9 @@ public class BattleHead : MonoBehaviour
     {
         for (int i = 0; i < nodeList.Count; i++)
         {
-            nodeList[i].CaculateAttribute(this,i);
+            nodeList[i].CaculateAttribute(this, i);
+            
         }
     }
-
+    
 }

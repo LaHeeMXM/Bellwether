@@ -24,11 +24,9 @@ public class UnitAttribute
     }
 }
 
-public class BattleNode
+public class BattleNode : MonoBehaviour
 {
     public CombatantData data;
-    public GameObject modelPrefab;
-
     //基础属性
     [SerializeField]
     private UnitAttribute baseAttribute;
@@ -49,6 +47,7 @@ public class BattleNode
     //离队时触发
     public Action<BattleHead> onRemove;
 
+    ShowUnitInfo _showUnitInfo;
 
     public void CaculateAttribute(BattleHead head, int index)
     {
@@ -65,5 +64,13 @@ public class BattleNode
         finalAttribute.Health += selfBonus.Health;
         finalAttribute.Attack += selfBonus.Attack;
         finalAttribute.Defense += selfBonus.Defense;
+
+        _showUnitInfo.SetData(finalAttribute);
     }
+
+    void Awake()
+    {
+        _showUnitInfo = GetComponent<ShowUnitInfo>();
+    }
+
 }

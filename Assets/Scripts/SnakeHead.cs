@@ -14,10 +14,10 @@ public class SnakeHead : MonoBehaviour
     
     [Tooltip("相邻两个节点中心点之间的理想最小距离（世界单位）")]
     public float absoluteNodeSpacing = 1.0f; 
-    
-    public GameObject defaultNodePrefab; 
 
     private readonly List<SnakeNode> allNodes = new List<SnakeNode>();
+
+    public GameObject newNodePrefab; // 新节点预制体
 
     void Start()
     {
@@ -39,12 +39,7 @@ public class SnakeHead : MonoBehaviour
         
         UpdateHead(moveInput, rotateInput);
         UpdateBodyPositions();
-
-        // 示例：按空格键添加节点
-        if (Input.GetKeyDown(KeyCode.Space) && defaultNodePrefab != null)
-        {
-            AddNode(defaultNodePrefab);
-        }
+        
     }
 
     // 处理 W A D 输入
@@ -134,33 +129,31 @@ public class SnakeHead : MonoBehaviour
             }
         }
     }
-    
+
     /// <summary>
-    /// 实例化传入的预制体，并将其作为新的身体节点添加到蛇尾。
+    /// 实例化传入的预制体，并将其作为新的身体节点添加到蛇尾。并返回蛇节点
     /// </summary>
-    public void AddNode(GameObject newNodePrefab)
+    public SnakeNode AddNode()
     {
-        if (newNodePrefab == null) return;
-        
-        // 1. 实例化新节点并获取/添加 SnakeNode 组件
         GameObject newCube = Instantiate(newNodePrefab);
         SnakeNode newNode = newCube.GetComponent<SnakeNode>() ?? newCube.AddComponent<SnakeNode>();
 
-        newNode.segmentIndex = allNodes.Count; 
-        
+        newNode.segmentIndex = allNodes.Count;
+
         SnakeNode lastNode = allNodes[allNodes.Count - 1];
-        
+
         // 2. ⭐ 计算新节点的位置：从最后一个节点的位置，沿着其后方 (负 forward 方向) 移动 absoluteNodeSpacing 距离。
         Vector3 newPosition = lastNode.transform.position - lastNode.transform.forward.normalized * absoluteNodeSpacing;
-        
+
         // 3. 设置位置和旋转
-        newCube.transform.position = newPosition; 
+        newCube.transform.position = newPosition;
         newCube.transform.rotation = lastNode.transform.rotation;
-        
-        newCube.transform.SetParent(transform.parent); 
+
+        newCube.transform.SetParent(transform.parent);
 
         // 4. 加入列表
         allNodes.Add(newNode);
+        return newNode;
     }
     
     public List<SnakeNode> GetAllNodes()

@@ -83,27 +83,27 @@ public class SheepAnimation : MonoBehaviour
         }
     
         
-        // 计算速度方向与角色朝向的夹角
-        float angle = Vector3.Angle(forward, horizontalVelocity);
+        // // 计算速度方向与角色朝向的夹角
+        // float angle = Vector3.Angle(forward, horizontalVelocity);
 
-        if (angle > turnAngleThreshold)
-        {
-            // 使用叉乘判断是左转还是右转
-            Vector3 cross = Vector3.Cross(forward, horizontalVelocity);
+        // if (angle > turnAngleThreshold)
+        // {
+        //     // 使用叉乘判断是左转还是右转
+        //     Vector3 cross = Vector3.Cross(forward, horizontalVelocity);
             
-            // 如果Y分量 > 0，速度在前方偏右；如果Y分量 < 0，速度在前方偏左
-            if (cross.y > 0)
-            {
-                // 速度在右侧 -> 播放右转动画
-                _animator.Play(turn90RAnimation);
-            }
-            else
-            {
-                // 速度在左侧 -> 播放左转动画
-                _animator.Play(turn90LAnimation);
-            }
-            return;
-        }
+        //     // 如果Y分量 > 0，速度在前方偏右；如果Y分量 < 0，速度在前方偏左
+        //     if (cross.y > 0)
+        //     {
+        //         // 速度在右侧 -> 播放右转动画
+        //         _animator.Play(turn90RAnimation);
+        //     }
+        //     else
+        //     {
+        //         // 速度在左侧 -> 播放左转动画
+        //         _animator.Play(turn90LAnimation);
+        //     }
+        //     return;
+        // }
         
         // 使用点积判断运动方向是否向前（点积 > 0 表示在前半球）
         float forwardDot = Vector3.Dot(forward, horizontalVelocity.normalized);

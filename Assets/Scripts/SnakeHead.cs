@@ -8,6 +8,8 @@ using Unity.VisualScripting;
 public class SnakeHead : MonoBehaviour
 {
     public bool isPlayer;
+
+    public float minSpeed = 5f; 
     public float headForwardSpeed = 5f;       // 蛇头前进的速度
     public float headRotationSpeed = 150f;    // 蛇头旋转的角度/秒
     
@@ -20,6 +22,9 @@ public class SnakeHead : MonoBehaviour
     private readonly List<SnakeNode> allNodes = new List<SnakeNode>();
 
     public GameObject newNodePrefab; // 新节点预制体
+
+    public float maxSpeed = 10f;
+    public float acc = 0.1f;
 
     void Start()
     {
@@ -37,7 +42,14 @@ public class SnakeHead : MonoBehaviour
     void Update()
     {
         if (!isPlayer) return;
-
+        if (Input.GetKey(KeyCode.Space))
+        {
+            headForwardSpeed = Mathf.Lerp(headForwardSpeed, maxSpeed, acc *Time.deltaTime);
+        }
+        else
+        {
+            headForwardSpeed = Mathf.Lerp(headForwardSpeed, minSpeed, acc *Time.deltaTime);
+        }
         // 获取输入量 (move: W, rotate: A/D)
         (float moveInput, float rotateInput) = HandleInput();
         UpdateHead(moveInput, rotateInput);

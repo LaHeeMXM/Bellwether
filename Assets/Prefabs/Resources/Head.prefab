@@ -46,11 +46,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isPlayer: 0
+  minSpeed: 5
   headForwardSpeed: 3
   headRotationSpeed: 30
   bodyFollowRate: 3
   absoluteNodeSpacing: 2
   newNodePrefab: {fileID: 6555786559354867229, guid: 30c522ea29873514a9d00a8055fbf2f6, type: 3}
+  maxSpeed: 20
+  acc: 5
 --- !u!114 &6058280968377523682
 MonoBehaviour:
   m_ObjectHideFlags: 0

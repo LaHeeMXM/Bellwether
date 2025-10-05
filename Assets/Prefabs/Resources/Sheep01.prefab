@@ -3733,6 +3733,10 @@ MonoBehaviour:
   trotAnimation: trot_forward
   sittostandAnimation: sit_to_stand
   standtositAnimation: stand_to_sit
+  attackAnimation: attack
+  deathAnimation: death
+  hitReactionAnimation: hit_reaction
+  eatingAnimation: eating
 --- !u!114 &5820903241924781567
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3745,22 +3749,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d589dcb69bfb4be4b8a0ea5b0603901f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  buffName: ATKF
+  buffParam:
+    a: 2
+    b: 1
   baseAttribute:
     Health: 5
     Attack: 2
     Defense: 2
-  forwardBonus:
-    Health: 2
-    Attack: 1
-    Defense: 0
-  backwardBonus:
-    Health: 0
-    Attack: 2
-    Defense: 0
-  selfBonus:
-    Health: 0
-    Attack: 0
-    Defense: 0
   finalAttribute:
     Health: 0
     Attack: 0
@@ -3790,6 +3786,10 @@ MonoBehaviour:
   trotAnimation: trot_forward
   sittostandAnimation: sit_to_stand
   standtositAnimation: stand_to_sit
+  attackAnimation: attack
+  hitReactionAnimation: hit_reaction
+  deathAnimation: death
+  idleAnimation: idle
 --- !u!65 &3272501988663322847
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3836,7 +3836,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 80
   m_CollisionDetection: 0
 --- !u!114 &3847088543891683395
 MonoBehaviour:

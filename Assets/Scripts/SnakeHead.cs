@@ -1,11 +1,13 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 /// <summary>
 /// 主要控制器：W前进，A/D旋转，身体跟随前一个节点。
 /// </summary>
 public class SnakeHead : MonoBehaviour
 {
+    public bool isPlayer;
     public float headForwardSpeed = 5f;       // 蛇头前进的速度
     public float headRotationSpeed = 150f;    // 蛇头旋转的角度/秒
     
@@ -34,7 +36,7 @@ public class SnakeHead : MonoBehaviour
     
     void Update()
     {
-        if (GetComponent<PlayerController>() == null) return;
+        if (!isPlayer) return;
 
         // 获取输入量 (move: W, rotate: A/D)
         (float moveInput, float rotateInput) = HandleInput();
@@ -61,18 +63,18 @@ public class SnakeHead : MonoBehaviour
     /// </summary>
     void UpdateHead(float moveInput, float rotateInput)
     {
-     
+        if(allNodes.Count == 0) return;
         if (moveInput > 0)
         {
             if (rotateInput != 0)
             {
-                transform.Rotate(Vector3.up, rotateInput * headRotationSpeed * Time.deltaTime, Space.Self);
+                allNodes[0].transform.Rotate(Vector3.up, rotateInput * headRotationSpeed * Time.deltaTime, Space.Self);
             }
             // 确保前进方向只在 XZ 平面上
-            Vector3 forwardDirection = transform.forward;
+            Vector3 forwardDirection =  allNodes[0].transform.forward;
             forwardDirection.y = 0; 
             
-            transform.position += forwardDirection.normalized * headForwardSpeed * Time.deltaTime;
+             allNodes[0].transform.position += forwardDirection.normalized * headForwardSpeed * Time.deltaTime;
         }
     }
 
@@ -136,23 +138,28 @@ public class SnakeHead : MonoBehaviour
     /// </summary>
     public SnakeNode AddNode()
     {
-        GameObject newCube = Instantiate(newNodePrefab);
-        SnakeNode newNode = newCube.GetComponent<SnakeNode>() ?? newCube.AddComponent<SnakeNode>();
+        GameObject newNodeObj = Instantiate(newNodePrefab);
+        SnakeNode newNode = newNodeObj.GetComponent<SnakeNode>() ?? newNodeObj.AddComponent<SnakeNode>();
 
         newNode.segmentIndex = allNodes.Count;
-
+        //第一个节点特殊初始化
+        if (newNode.segmentIndex == 0)
+        {
+            newNodeObj.transform.position = transform.position;
+            newNodeObj.transform.rotation = transform.rotation;
+            newNodeObj.transform.SetParent(transform);
+            return newNode;
+        }
         SnakeNode lastNode = allNodes[allNodes.Count - 1];
-
-        // 2. ⭐ 计算新节点的位置：从最后一个节点的位置，沿着其后方 (负 forward 方向) 移动 absoluteNodeSpacing 距离。
+        
+        //新节点的位置：从最后一个节点的位置，沿着其后方 (负 forward 方向) 移动 absoluteNodeSpacing 距离。
         Vector3 newPosition = lastNode.transform.position - lastNode.transform.forward.normalized * absoluteNodeSpacing;
 
-        // 3. 设置位置和旋转
-        newCube.transform.position = newPosition;
-        newCube.transform.rotation = lastNode.transform.rotation;
+        newNodeObj.transform.position = newPosition;
+        newNodeObj.transform.rotation = lastNode.transform.rotation;
 
-        newCube.transform.SetParent(transform.parent);
+        newNodeObj.transform.SetParent(transform.parent);
 
-        // 4. 加入列表
         allNodes.Add(newNode);
         return newNode;
     }

@@ -2773,22 +2773,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d589dcb69bfb4be4b8a0ea5b0603901f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  buffName: HPB
+  buffParam:
+    a: 5
+    b: 2
   baseAttribute:
-    Health: 5
-    Attack: 2
-    Defense: 2
-  forwardBonus:
-    Health: 2
-    Attack: 1
-    Defense: 0
-  backwardBonus:
-    Health: 0
-    Attack: 2
-    Defense: 0
-  selfBonus:
-    Health: 0
-    Attack: 0
-    Defense: 0
+    Health: 3
+    Attack: 6
+    Defense: 1
   finalAttribute:
     Health: 0
     Attack: 0

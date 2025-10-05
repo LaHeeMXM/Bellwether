@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 public class BattleHead : MonoBehaviour
 {
+    public bool isPlayer;
     SnakeHead snakeHead;
     public List<BattleNode> nodeList = new List<BattleNode>();
 
@@ -9,7 +10,10 @@ public class BattleHead : MonoBehaviour
     {
         snakeHead = GetComponent<SnakeHead>();
     }
-
+    void Start()
+    {
+        
+    }
     //OnlyTest
     void Update()
     {

@@ -10,6 +10,13 @@ public class ShowUnitInfo : MonoBehaviour
     VinoLabel healthLabel;
     VinoLabel defenseLabel;
 
+    public void SetVisible(bool visible)
+    {
+        attackLabel.gameObject.SetActive(visible);
+        healthLabel.gameObject.SetActive(visible);
+        defenseLabel.gameObject.SetActive(visible);
+    }
+
     void Awake()
     {
         attackLabel = transform.Find("label_attack").GetComponent<VinoLabel>();
@@ -23,7 +30,10 @@ public class ShowUnitInfo : MonoBehaviour
         healthLabel.SetText(data.Health.ToString());
         defenseLabel.SetText(data.Defense.ToString());
     }
+    void Update()
+    {
+        SetVisible(Input.GetKey(KeyCode.LeftShift));
+    }
 
-    
-    
+
 }

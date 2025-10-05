@@ -76,5 +76,54 @@ public class BattleHead : MonoBehaviour
             nodeList[i].CaculateAttribute(this, i);
         }
     }
-    
+
+    public void SwapNodeForward(BattleNode node)
+    {
+        int currentIndex = nodeList.IndexOf(node);
+        // 如果已经是蛇头，或者找不到该节点，则不操作
+        if (currentIndex <= 0) return;
+
+        SwapNodes(currentIndex, currentIndex - 1);
+    }
+
+
+    public void SwapNodeBackward(BattleNode node)
+    {
+        int currentIndex = nodeList.IndexOf(node);
+        // 如果已经是蛇尾，或者找不到该节点，则不操作
+        if (currentIndex < 0 || currentIndex >= nodeList.Count - 1) return;
+
+        SwapNodes(currentIndex, currentIndex + 1);
+    }
+
+    private void SwapNodes(int index1, int index2)
+    {
+        // --- 数据交换 ---
+        BattleNode temp = nodeList[index1];
+        nodeList[index1] = nodeList[index2];
+        nodeList[index2] = temp;
+
+        // --- 表现交换 ---
+        snakeHead.SwapNodeTransforms(index1, index2);
+
+        // --- 全局更新 ---
+        UpdateNodes();
+
+        // --- 检查并更新相机跟随目标 ---
+        if (index1 == 0 || index2 == 0)
+        {
+            if (nodeList.Count > 0)
+            {
+                SnakeNode newHeadNode = snakeHead.GetAllNodes()[0];
+
+                // 区分玩家和敌人
+                if (isPlayer)
+                {
+                    PlayerInputManager.Instance.UpdateOriginalFollowTarget(newHeadNode.transform);
+                }
+            }
+        }
+
+        Debug.Log($"交换了 {index1} 和 {index2} 位置的节点。");
+    }
 }

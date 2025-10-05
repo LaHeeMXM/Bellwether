@@ -9,11 +9,15 @@ public class PlayerController : MonoBehaviour
     GameObject headInstance;
     SnakeHead snakeHead;
     BattleHead battleHead;
-    CinemachineVirtualCamera cineCamera;
-    // Start is called before the first frame update
+    public static CinemachineVirtualCamera cineCamera;
+
     void Start()
     {
-        cineCamera = GameObject.Find("VirtualCamera").GetComponent<CinemachineVirtualCamera>();
+        if (cineCamera == null)
+        {
+            cineCamera = GameObject.Find("VirtualCamera").GetComponent<CinemachineVirtualCamera>();
+        }
+
         if (headInstance == null)
         {
             headInstance = Instantiate(Resources.Load<GameObject>("Head"));
@@ -27,6 +31,11 @@ public class PlayerController : MonoBehaviour
             battleHead.isPlayer = true;
             battleHead.AddSheep("Sheep01");
             cineCamera.Follow = snakeHead.GetAllNodes()[0].transform;
+
+            if (snakeHead.isPlayer && snakeHead.GetAllNodes().Count > 0)
+            {
+                cineCamera.Follow = snakeHead.GetAllNodes()[0].transform;
+            }
         }
     }
 

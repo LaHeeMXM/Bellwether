@@ -187,4 +187,31 @@ public class SnakeHead : MonoBehaviour
     {
         return allNodes;
     }
+
+    public void SwapNodeTransforms(int index1, int index2)
+    {
+        if (index1 < 0 || index1 >= allNodes.Count || index2 < 0 || index2 >= allNodes.Count)
+        {
+            Debug.LogError("交换索引越界！");
+            return;
+        }
+
+        // 交换allNodes列表中的占位符节点
+        SnakeNode tempNode = allNodes[index1];
+        allNodes[index1] = allNodes[index2];
+        allNodes[index2] = tempNode;
+
+        Transform t1 = allNodes[index1].transform;
+        Transform t2 = allNodes[index2].transform;
+
+        Vector3 tempPos = t1.position;
+        Quaternion tempRot = t1.rotation;
+
+        t1.position = t2.position;
+        t1.rotation = t2.rotation;
+
+        t2.position = tempPos;
+        t2.rotation = tempRot;
+    }
+
 }

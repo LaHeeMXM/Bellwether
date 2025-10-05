@@ -5,7 +5,7 @@ public class SheepAnimation : MonoBehaviour
 {
     [Header("速度阈值")]
     [Tooltip("低于此速度不播放任何动画，角色视为静止")]
-    public float idleSpeed = 0.05f;
+    public float idleSpeed = 0.1f;
 
     [Tooltip("低于此速度播放 'Walk' 动画")]
     public float walkSpeed = 2f;

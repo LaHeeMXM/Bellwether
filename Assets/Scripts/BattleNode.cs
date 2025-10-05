@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
+using UnityEngine.EventSystems;
+
 [Serializable]
 public class UnitAttribute
 {
@@ -24,7 +26,7 @@ public class UnitAttribute
     }
 }
 
-public class BattleNode : MonoBehaviour
+public class BattleNode : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
     [HideInInspector]
     public GameObject sheepPrefab;
@@ -88,6 +90,38 @@ public class BattleNode : MonoBehaviour
         _showUnitInfo = GetComponentInChildren<ShowUnitInfo>();
         Level = 1;
     }
+
+
+    // 当鼠标指针按下
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            Debug.Log("点击了节点: " + gameObject.name + " at index " + _index);
+            // 通知输入管理器，我们开始了一个换位操作
+            PlayerInputManager.Instance.StartNodeSwap(this);
+        }
+    }
+
+    // 当鼠标指针抬起
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            // 通知输入管理器，我们结束了换位操作
+            PlayerInputManager.Instance.EndNodeSwap();
+        }
+    }
+
+
+
+
+
+
+
+
+
+
 
     //获取战斗数据
     public CombatantData GetCombatantData()

@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Collections;
 
 public class TurnBasedManager : MonoBehaviour
 {
@@ -11,6 +10,7 @@ public class TurnBasedManager : MonoBehaviour
     public  GameObject enemyUnitModel;
     public  bool isPlayerFirst;
 
+    [System.Serializable]
     public  class BattleUnit
     {
         public string unitName;
@@ -40,6 +40,10 @@ public class TurnBasedManager : MonoBehaviour
         this.playerUnitModel = playerModel;
         this.enemyUnitModel = enemyModel;
 
+        //在战斗开始前，通知两个单位进入战斗状态
+        this.playerUnitModel.GetComponent<SheepAnimation>()?.EnterCombatState();
+        this.enemyUnitModel.GetComponent<SheepAnimation>()?.EnterCombatState();
+
         this.playerBattleData = new BattleUnit
         {
             unitName = playerData.unitName,
@@ -55,6 +59,8 @@ public class TurnBasedManager : MonoBehaviour
             Attack = enemyData.Attack + enemyData.Assistance,
             Defense = enemyData.Defense
         };
+
+        UIBattleManager.Instance.InitializeUI(playerBattleData, enemyBattleData);
 
         currentState = BattleState.START;
         StartCoroutine(BattleFlow());
@@ -95,20 +101,80 @@ public class TurnBasedManager : MonoBehaviour
 
     IEnumerator AttackRoutine(BattleUnit attacker, BattleUnit defender, GameObject attackerModel, GameObject defenderModel)
     {
+        // --- 攻击方动画 ---
 
-        // attackerModel.GetComponent<Animator>().SetTrigger("Attack");
+        Debug.Log(attacker.unitName + " 发起攻击!");
+        SheepAnimation attackerAnim = attackerModel.GetComponent<SheepAnimation>();
 
-        yield return new WaitForSeconds(1f); // 等动画
+        if (attackerAnim != null)
+        {
+            attackerAnim.PlayAttack();
+        }
 
+        yield return new WaitForSeconds(0.5f);
+
+
+
+        // --- 伤害结算 ---
 
         int damageDealt = Mathf.Max(1, attacker.Attack - defender.Defense);
         defender.Health -= damageDealt;
 
+        if (defender == playerBattleData)
+        {
+            UIBattleManager.Instance.OnDataChange(UIBattleManager.Instance.playerHealthText, defender.Health);
+        }
+        else
+        {
+            UIBattleManager.Instance.OnDataChange(UIBattleManager.Instance.enemyHealthText, defender.Health);
+        }
 
-        // 受击或死亡动画
+        Debug.Log(defender.unitName + " 受到 " + damageDealt + " 伤害, 剩余生命: " + defender.Health);
 
-        yield return new WaitForSeconds(1f); // 回合间停顿
+
+        // --- 受击方动画 ---
+
+        SheepAnimation defenderAnim = defenderModel.GetComponent<SheepAnimation>();
+
+        if (defenderAnim != null)
+        {
+            // 判断是播放死亡还是受击动画
+            if (defender.Health <= 0)
+            {
+                Debug.Log(defender.unitName + " 被击败了!");
+                defenderAnim.PlayDeath();
+            }
+            else
+            {
+                defenderAnim.PlayHitReaction();
+            }
+        }
+
+        // 等动画
+        yield return new WaitForSeconds(1.0f);
+
+        // 回合间停顿
+        yield return new WaitForSeconds(0.5f);
+
     }
+
+
+    //public void ChangeAttack(BattleUnit targetUnit, int newAttackValue)
+    //{
+    //    targetUnit.Attack = newAttackValue;
+
+    //    if (targetUnit == playerBattleData)
+    //    {
+    //        UIBattleManager.Instance.OnDataChange(UIBattleManager.Instance.playerAttackText, newAttackValue);
+    //    }
+    //    else
+    //    {
+    //        UIBattleManager.Instance.OnDataChange(UIBattleManager.Instance.enemyAttackText, newAttackValue);
+    //    }
+    //}
+
+
+
 
     void EndBattle()
     {

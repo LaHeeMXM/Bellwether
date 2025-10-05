@@ -14,6 +14,11 @@ namespace Ursaanimation.CubicFarmAnimals
         public string sittostandAnimation = "sit_to_stand";
         public string standtositAnimation = "stand_to_sit";
 
+        public string attackAnimation = "attack";
+        public string deathAnimation = "death";
+        public string hitReactionAnimation = "hit_reaction";
+        public string eatingAnimation = "eating";
+
         void Start()
         {
             animator = GetComponent<Animator>();
@@ -53,6 +58,28 @@ namespace Ursaanimation.CubicFarmAnimals
             {
                 animator.Play(standtositAnimation);
             }
+
+            else if (Input.GetKeyDown(KeyCode.U))
+            {
+                animator.Play(attackAnimation);
+            }
+            else if (Input.GetKeyDown(KeyCode.I))
+            {
+                animator.Play(deathAnimation);
+            }
+            else if (Input.GetKeyDown(KeyCode.O))
+            {
+                animator.Play(hitReactionAnimation);
+            }
+            else if (Input.GetKeyDown(KeyCode.P))
+            {
+                animator.Play(eatingAnimation);
+            }
+
+
+
+
+
         }
     }
 }

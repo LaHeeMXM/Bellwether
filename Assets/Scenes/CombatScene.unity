@@ -2644,31 +2644,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerHeadData:
-    unitName: 1
+    unitName: Player
     unitPrefab: {fileID: 7180115301140830008, guid: 95f2750addc25544f965bb6545b2520c, type: 3}
-    Health: 100
+    Health: 70
     Attack: 5
     Defense: 0
     Level: 0
     Location: 0
-    Assistance: 0
+    Assistance: 4
   enemyHeadData:
-    unitName: 2
+    unitName: Enemy
     unitPrefab: {fileID: 7180115301140830008, guid: 95f2750addc25544f965bb6545b2520c, type: 3}
-    Health: 100
+    Health: 60
     Attack: 4
     Defense: 0
     Level: 0
     Location: 0
     Assistance: 0
   targetNodeData:
-    unitName: 3
+    unitName: Target
     unitPrefab: {fileID: 7180115301140830008, guid: 95f2750addc25544f965bb6545b2520c, type: 3}
-    Health: 100
+    Health: 30
     Attack: 3
     Defense: 0
     Level: 0
-    Location: 0
+    Location: 2
     Assistance: 0
   isTargetNodePlayer: 0
 --- !u!1 &1004396018587780562

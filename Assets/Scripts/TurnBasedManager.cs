@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class TurnBasedManager : MonoBehaviour
 {
@@ -27,6 +28,10 @@ public class TurnBasedManager : MonoBehaviour
     private bool isRescuePossible = false; // 本场战斗是否可能触发救援
     private int rescueDistance;            // 救援蛇头剩余的“路程”
     private float turnCounter = 0.5f;           // 用于计算救援速度的回合计数器
+
+    [Header("救援动画设置")]
+    public float swapAnimationDuration = 1.5f;
+    public float swapJumpHeight = 2.0f;
 
 
     void Awake()
@@ -201,7 +206,6 @@ public class TurnBasedManager : MonoBehaviour
 
     }
 
-
     //public void ChangeAttack(BattleUnit targetUnit, int newAttackValue)
     //{
     //    targetUnit.Attack = newAttackValue;
@@ -221,7 +225,7 @@ public class TurnBasedManager : MonoBehaviour
         UIBattleManager.Instance.ShowArrivalMessage();
         currentState = BattleState.PAUSED; // 暂停战斗流程以进行刷新
 
-        yield return new WaitForSeconds(1.5f); // 留出停顿
+        yield return new WaitForSeconds(1f); // 留出停顿
 
         // 判断是哪一方被救援
         bool isPlayerSideRescued = CombatManager.Instance.isTargetNodePlayer;
@@ -239,11 +243,9 @@ public class TurnBasedManager : MonoBehaviour
             playerBattleData.Defense = rescuingHeadData.Defense;
 
             // --- 模型刷新 ---
-            Vector3 oldPos = playerUnitModel.transform.position;
-            Quaternion oldRot = playerUnitModel.transform.rotation;
-            Destroy(playerUnitModel); 
-            playerUnitModel = Instantiate(rescuingHeadData.unitPrefab, oldPos, oldRot); // 在原位置生成新的蛇头模型
-            playerUnitModel.GetComponent<SheepAnimation>()?.EnterCombatState();
+            yield return StartCoroutine(AnimateModelSwap(playerUnitModel, rescuingHeadData.unitPrefab, (newModel) => {
+                playerUnitModel = newModel; // 更新我们主要的模型引用
+            }));
         }
         else // 敌人方被救援
         {
@@ -258,11 +260,9 @@ public class TurnBasedManager : MonoBehaviour
             enemyBattleData.Defense = rescuingHeadData.Defense;
 
             // --- 模型刷新 ---
-            Vector3 oldPos = enemyUnitModel.transform.position;
-            Quaternion oldRot = enemyUnitModel.transform.rotation;
-            Destroy(enemyUnitModel);
-            enemyUnitModel = Instantiate(rescuingHeadData.unitPrefab, oldPos, oldRot);
-            enemyUnitModel.GetComponent<SheepAnimation>()?.EnterCombatState();
+            yield return StartCoroutine(AnimateModelSwap(enemyUnitModel, rescuingHeadData.unitPrefab, (newModel) => {
+                enemyUnitModel = newModel; // 更新我们主要的模型引用
+            }));
         }
 
         // 初始化函数来一次性刷新所有UI
@@ -273,6 +273,57 @@ public class TurnBasedManager : MonoBehaviour
         // 刷新完毕，将战斗流程交还给当前回合的行动方
         currentState = isPlayerFirst ? BattleState.PLAYERTURN : BattleState.ENEMYTURN;
     }
+
+    private IEnumerator AnimateModelSwap(GameObject oldModel, GameObject newPrefab, Action<GameObject> onComplete)
+    {
+        float elapsedTime = 0f;
+        Vector3 startPosition = oldModel.transform.position;
+        Quaternion startRotation = oldModel.transform.rotation; // 记录原始朝向
+
+        GameObject currentModel = oldModel;
+        GameObject newModelInstance = null;
+        bool hasSwapped = false;
+
+        while (elapsedTime < swapAnimationDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float progress = Mathf.Clamp01(elapsedTime / swapAnimationDuration);
+
+            // --- 平滑缓动的进度值 (用于旋转) ---
+            // SmoothStep会让进度在开始和结束时速度为0，中间最快
+            float easedProgress = Mathf.SmoothStep(0, 1, progress);
+
+            // --- 计算位置 (跳跃弧线，本身就是平滑的) ---
+            float jumpHeight = Mathf.Sin(progress * Mathf.PI) * swapJumpHeight;
+            currentModel.transform.position = startPosition + new Vector3(0, jumpHeight, 0);
+
+            // --- 计算相对旋转 ---
+            float rotationY = easedProgress * 360f;
+            Quaternion spinRotation = Quaternion.Euler(0, rotationY, 0);
+            currentModel.transform.rotation = startRotation * spinRotation;
+
+            // --- 切换模型 ---
+            if (progress >= 0.5f && !hasSwapped)
+            {
+                hasSwapped = true;
+                Vector3 swapPosition = currentModel.transform.position;
+                Quaternion swapRotation = currentModel.transform.rotation;
+                Destroy(oldModel);
+                newModelInstance = Instantiate(newPrefab, swapPosition, swapRotation);
+                newModelInstance.GetComponent<SheepAnimation>()?.EnterCombatState();
+                currentModel = newModelInstance;
+            }
+
+            yield return null;
+        }
+
+        // --- 清理工作 ---
+        currentModel.transform.position = startPosition;
+        currentModel.transform.rotation = startRotation;
+
+        onComplete?.Invoke(newModelInstance);
+    }
+
 
 
     void EndBattle()

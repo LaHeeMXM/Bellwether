@@ -3569,7 +3569,7 @@ MonoBehaviour:
     Assistance: 0
   targetNodeData:
     unitName: Target
-    unitPrefab: {fileID: 7180115301140830008, guid: 95f2750addc25544f965bb6545b2520c, type: 3}
+    unitPrefab: {fileID: 7180115301140830008, guid: 65f47c0ff996a8a4385c70b590029d88, type: 3}
     Health: 30
     Attack: 3
     Defense: 0
@@ -3730,6 +3730,8 @@ MonoBehaviour:
     Attack: 0
     Defense: 0
   currentState: 0
+  swapAnimationDuration: 0.5
+  swapJumpHeight: 0.5
 --- !u!1 &6524664059738819718
 GameObject:
   m_ObjectHideFlags: 0

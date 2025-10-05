@@ -26,6 +26,8 @@ public class UnitAttribute
 
 public class BattleNode : MonoBehaviour
 {
+    [HideInInspector]
+    public GameObject sheepPrefab;
     public string buffName;
     public BuffParams buffParam;
 
@@ -39,7 +41,7 @@ public class BattleNode : MonoBehaviour
     // //自身增益
     // public UnitAttribute selfBonus;
 
-    
+
     [HideInInspector]
     //最终属性
     public UnitAttribute finalAttribute;
@@ -53,7 +55,7 @@ public class BattleNode : MonoBehaviour
     ShowUnitInfo _showUnitInfo;
     int _index = 0;
     BattleHead _head;
-    
+
     public void CaculateAttribute(BattleHead head, int index)
     {
         var nodeList = head.GetList();
@@ -104,14 +106,27 @@ public class BattleNode : MonoBehaviour
             k *= 2;
         }
         data.Assistance = assistance;
+        data.unitPrefab = sheepPrefab;
         return data;
     }
-    public BattleNode GetHeadNode()
+    public BattleHead GetHead()
     {
-        return _head.GetComponent<BattleNode>();
+        return _head;
+    }
+    public void SetHead(BattleHead head)
+    {
+        _head = head;
+    }
+    public int GetIndex()
+    {
+        return _index;
     }
     public bool IsHead()
     {
-        return GetComponent<BattleHead>() != null;
+        return _index == 0;
+    }
+    public bool IsPlayer()
+    { 
+        return _head.isPlayer;
     }
 }

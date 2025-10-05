@@ -25,12 +25,16 @@ public class BattleHead : MonoBehaviour
 
     public void AddSheep(string sheepName)
     {
-        var newNode = Instantiate(Resources.Load<GameObject>(sheepName));
-        AddNode(newNode.GetComponent<BattleNode>());
+        var sheepPrefab = Resources.Load<GameObject>(sheepName);
+        var newNode = Instantiate(sheepPrefab);
+        var battleNode = newNode.GetComponent<BattleNode>();
+        battleNode.sheepPrefab = sheepPrefab;
+        AddNode(battleNode);
     }
 
     private void AddNode(BattleNode newNode)
     {
+        newNode.SetHead(this);
         nodeList.Add(newNode);
         newNode.onAdd?.Invoke(this, nodeList.Count - 1);
 

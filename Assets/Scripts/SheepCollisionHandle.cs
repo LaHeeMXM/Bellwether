@@ -4,43 +4,41 @@ using UnityEngine;
 
 public class SheepCollisionHandle : MonoBehaviour
 {
-    public bool isPlayer => (GetComponentInParent<PlayerController>() != null);
+    BattleHead _battleHead;
+
     void OnCollisionEnter(Collision info)
     {
-        Debug.Log("Collision!");
+        
         var oppositeNode = info.collider.GetComponent<BattleNode>();
         var selfNode = GetComponent<BattleNode>();
-        if(oppositeNode== null || selfNode==null) return;
+        if(oppositeNode == null || selfNode == null) return;
+        //只有head这边触发
+        if (!selfNode.IsHead()) return;
+        if(selfNode.IsPlayer() == oppositeNode.IsPlayer()) return;
+
         CombatantData targetNodeData;
         CombatantData playerHeadData;
         CombatantData enemyHeadData;
-        if (!oppositeNode.IsHead() && !selfNode.IsHead()) return;
 
-        if (!oppositeNode.IsHead())
+        targetNodeData = oppositeNode.GetCombatantData();
+        if (selfNode.IsPlayer())
         {
-            targetNodeData = oppositeNode.GetCombatantData();
+            playerHeadData = selfNode.GetCombatantData();
+            enemyHeadData = oppositeNode.GetHead().GetList()[0].GetCombatantData();
         }
-        else
-        {
-            targetNodeData = selfNode.GetCombatantData();
+        else {
+            playerHeadData = oppositeNode.GetHead().GetList()[0].GetCombatantData();
+            enemyHeadData = selfNode.GetCombatantData();
         }
+       
 
-        if (isPlayer)
-        {
-            playerHeadData = GetComponent<BattleNode>().GetHeadNode().GetCombatantData();
-            enemyHeadData = oppositeNode.GetHeadNode().GetCombatantData();
-        }
-        else
-        {
-            enemyHeadData = GetComponent<BattleNode>().GetHeadNode().GetCombatantData();
-            playerHeadData = oppositeNode.GetHeadNode().GetCombatantData();
-        }
         Debug.Log("Into Combat!");
-        CombatManager.Instance.StartCombat(playerHeadData,enemyHeadData,selfNode.GetCombatantData(),isPlayer);
+        CombatManager.Instance.StartCombat(playerHeadData,enemyHeadData,targetNodeData,oppositeNode.IsPlayer());
     }
     void Awake()
     {
-        
+        _battleHead = GetComponent<BattleNode>().GetHead();
+
     }
     // Start is called before the first frame update
     void Start()

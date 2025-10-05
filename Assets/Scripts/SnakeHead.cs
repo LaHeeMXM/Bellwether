@@ -23,15 +23,15 @@ public class SnakeHead : MonoBehaviour
 
     void Start()
     {
-        // 确保 SnakeHead GameObject 挂载了 SnakeNode 脚本
-        SnakeNode headNode = GetComponent<SnakeNode>();
-        if (headNode == null)
-        {
-            headNode = gameObject.AddComponent<SnakeNode>();
-            headNode.size = new Vector3(1f, 1f, 1f); 
-        }
-        headNode.segmentIndex = 0; 
-        allNodes.Add(headNode);
+        // // 确保 SnakeHead GameObject 挂载了 SnakeNode 脚本
+        // SnakeNode headNode = GetComponent<SnakeNode>();
+        // if (headNode == null)
+        // {
+        //     headNode = gameObject.AddComponent<SnakeNode>();
+        //     headNode.size = new Vector3(1f, 1f, 1f); 
+        // }
+        // headNode.segmentIndex = 0; 
+        // allNodes.Add(headNode);
     }
     
     void Update()
@@ -63,7 +63,8 @@ public class SnakeHead : MonoBehaviour
     /// </summary>
     void UpdateHead(float moveInput, float rotateInput)
     {
-        if(allNodes.Count == 0) return;
+        if(allNodes.Count == 0)
+            return;
         if (moveInput > 0)
         {
             if (rotateInput != 0)
@@ -140,14 +141,16 @@ public class SnakeHead : MonoBehaviour
     {
         GameObject newNodeObj = Instantiate(newNodePrefab);
         SnakeNode newNode = newNodeObj.GetComponent<SnakeNode>() ?? newNodeObj.AddComponent<SnakeNode>();
-
+        
         newNode.segmentIndex = allNodes.Count;
+
         //第一个节点特殊初始化
         if (newNode.segmentIndex == 0)
         {
+            newNodeObj.transform.SetParent(transform.parent);
             newNodeObj.transform.position = transform.position;
             newNodeObj.transform.rotation = transform.rotation;
-            newNodeObj.transform.SetParent(transform);
+            allNodes.Add(newNode);
             return newNode;
         }
         SnakeNode lastNode = allNodes[allNodes.Count - 1];
@@ -155,13 +158,17 @@ public class SnakeHead : MonoBehaviour
         //新节点的位置：从最后一个节点的位置，沿着其后方 (负 forward 方向) 移动 absoluteNodeSpacing 距离。
         Vector3 newPosition = lastNode.transform.position - lastNode.transform.forward.normalized * absoluteNodeSpacing;
 
+        newNodeObj.transform.SetParent(transform.parent);
         newNodeObj.transform.position = newPosition;
         newNodeObj.transform.rotation = lastNode.transform.rotation;
 
-        newNodeObj.transform.SetParent(transform.parent);
 
         allNodes.Add(newNode);
         return newNode;
+    }
+    public void RemoveNode(SnakeNode node)
+    {
+        allNodes.Remove(node);
     }
     
     public List<SnakeNode> GetAllNodes()

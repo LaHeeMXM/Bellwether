@@ -159,6 +159,9 @@ public class SheepAnimation : MonoBehaviour
     public void PlayDeath()
     {
         _animator.CrossFadeInFixedTime(deathAnimation, 0.1f);
+        Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
+
     }
+    public GameObject deathEffectPrefab;
 
 }

@@ -3749,6 +3749,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d589dcb69bfb4be4b8a0ea5b0603901f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sheepPrefab: {fileID: 0}
   buffName: ATKF
   buffParam:
     a: 2
@@ -3790,6 +3791,7 @@ MonoBehaviour:
   hitReactionAnimation: hit_reaction
   deathAnimation: death
   idleAnimation: idle
+  deathEffectPrefab: {fileID: 7065344870798580063, guid: 8841465de8f594f4f83527f89ef87841, type: 3}
 --- !u!65 &3272501988663322847
 BoxCollider:
   m_ObjectHideFlags: 0

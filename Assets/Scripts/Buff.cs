@@ -36,9 +36,11 @@ public static class Buff
     //可以使用字符串来配置Buff函数
     public static Dictionary<string, BuffFunction> buffFunctionDict = new Dictionary<string, BuffFunction>{
         {"HPF",AddHealthForward},
-        {"HPB",AddHealthForward},
+        {"HPB",AddHealthBackward},
         {"ATKF",AddAttackForward},
         {"ATKB",AddAttackBackward},
+        //{"DEFF",AddDefenceForward},
+        //{"DEFB",AddDefenceBackward},
 
     };
 

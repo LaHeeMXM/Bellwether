@@ -10,11 +10,7 @@ public class BattleHead : MonoBehaviour
     {
         snakeHead = GetComponent<SnakeHead>();
     }
-    void Start()
-    {
-        
-    }
-    //OnlyTest
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.T))
@@ -26,27 +22,53 @@ public class BattleHead : MonoBehaviour
     public void AddSheep(string sheepName)
     {
         var sheepPrefab = Resources.Load<GameObject>(sheepName);
-        var newNode = Instantiate(sheepPrefab);
-        var battleNode = newNode.GetComponent<BattleNode>();
+
+        if (sheepPrefab == null)
+        {
+            Debug.LogError("无法在找到Prefab: " + sheepName);
+            return;
+        }
+
+        var newNodeObject = Instantiate(sheepPrefab);
+        var battleNode = newNodeObject.GetComponent<BattleNode>();
+        var snakeNode = newNodeObject.GetComponent<SnakeNode>();
+
+        if (battleNode == null || snakeNode == null)
+        {
+            Destroy(newNodeObject); // 销毁有问题的对象
+            return;
+        }
         battleNode.sheepPrefab = sheepPrefab;
-        AddNode(battleNode);
+        AddNode(battleNode, snakeNode);
     }
 
-    private void AddNode(BattleNode newNode)
+    private void AddNode(BattleNode newBattleNode, SnakeNode newSnakeNode)
     {
-        newNode.SetHead(this);
-        nodeList.Add(newNode);
-        newNode.onAdd?.Invoke(this, nodeList.Count - 1);
+        newBattleNode.SetHead(this);
+        nodeList.Add(newBattleNode);
+        newBattleNode.onAdd?.Invoke(this, nodeList.Count - 1);
 
-        var node = snakeHead.AddNode();
-        node.SetModel(newNode.gameObject);
+        snakeHead.AddNodeToList(newSnakeNode);
+
         UpdateNodes();
     }
 
-    public void RemoveNode(BattleNode node)
+    public void RemoveNode(BattleNode nodeToRemove)
     {
-        nodeList.Remove(node);
-        node.onRemove?.Invoke(this);
+        // 从物理层移除
+        var snakeNodeToRemove = nodeToRemove.GetComponent<SnakeNode>();
+        if (snakeNodeToRemove != null)
+        {
+            snakeHead.RemoveNodeFromList(snakeNodeToRemove);
+        }
+
+        // 从逻辑层移除
+        nodeList.Remove(nodeToRemove);
+        nodeToRemove.onRemove?.Invoke(this);
+
+        // 销毁GameObject
+        Destroy(nodeToRemove.gameObject);
+
         UpdateNodes();
     }
 
@@ -54,10 +76,12 @@ public class BattleHead : MonoBehaviour
     public void ClearNodes(int index)
     {
         if (index < 0 || index >= nodeList.Count) return;
-        //只触发指定节点的离队事件
-        nodeList[index].onRemove?.Invoke(this);
-        nodeList.RemoveRange(index, nodeList.Count - index);
-        UpdateNodes();
+
+        // 从后往前移除，这样更安全
+        for (int i = nodeList.Count - 1; i >= index; i--)
+        {
+            RemoveNode(nodeList[i]);
+        }
     }
 
     public List<BattleNode> GetList()

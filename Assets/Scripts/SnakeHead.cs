@@ -17,11 +17,9 @@ public class SnakeHead : MonoBehaviour
     public float bodyFollowRate = 10f; 
     
     [Tooltip("相邻两个节点中心点之间的理想最小距离（世界单位）")]
-    public float absoluteNodeSpacing = 1.0f; 
+    public float absoluteNodeSpacing = 1.0f;
 
     private readonly List<SnakeNode> allNodes = new List<SnakeNode>();
-
-    public GameObject newNodePrefab; // 新节点预制体
 
     public float maxSpeed = 10f;
     public float acc = 0.1f;
@@ -149,40 +147,41 @@ public class SnakeHead : MonoBehaviour
     /// <summary>
     /// 实例化传入的预制体，并将其作为新的身体节点添加到蛇尾。并返回蛇节点
     /// </summary>
-    public SnakeNode AddNode()
+    public void AddNodeToList(SnakeNode newNode)
     {
-        GameObject newNodeObj = Instantiate(newNodePrefab);
-        SnakeNode newNode = newNodeObj.GetComponent<SnakeNode>() ?? newNodeObj.AddComponent<SnakeNode>();
-        
-        newNode.segmentIndex = allNodes.Count;
+        int newIndex = allNodes.Count;
+        newNode.segmentIndex = newIndex;
 
-        //第一个节点特殊初始化
-        if (newNode.segmentIndex == 0)
+        // 第一个节点（蛇头）的特殊处理
+        if (newIndex == 0)
         {
-            newNodeObj.transform.SetParent(transform.parent);
-            newNodeObj.transform.position = transform.position;
-            newNodeObj.transform.rotation = transform.rotation;
+            // 它的初始位置就是 "Head" 的位置
+            newNode.transform.SetParent(transform.parent); // 放在与 "Head" 同级
+            newNode.transform.position = transform.position;
+            newNode.transform.rotation = transform.rotation;
             allNodes.Add(newNode);
-            return newNode;
+            return;
         }
-        SnakeNode lastNode = allNodes[allNodes.Count - 1];
-        
-        //新节点的位置：从最后一个节点的位置，沿着其后方 (负 forward 方向) 移动 absoluteNodeSpacing 距离。
+
+        // 后续身体节点的处理
+        SnakeNode lastNode = allNodes[newIndex - 1];
+
         Vector3 newPosition = lastNode.transform.position - lastNode.transform.forward.normalized * absoluteNodeSpacing;
 
-        newNodeObj.transform.SetParent(transform.parent);
-        newNodeObj.transform.position = newPosition;
-        newNodeObj.transform.rotation = lastNode.transform.rotation;
-
+        newNode.transform.SetParent(transform.parent); // 放在与 "Head" 同级
+        newNode.transform.position = newPosition;
+        newNode.transform.rotation = lastNode.transform.rotation;
 
         allNodes.Add(newNode);
-        return newNode;
     }
-    public void RemoveNode(SnakeNode node)
+
+
+
+    public void RemoveNodeFromList(SnakeNode nodeToRemove)
     {
-        allNodes.Remove(node);
+        allNodes.Remove(nodeToRemove);
     }
-    
+
     public List<SnakeNode> GetAllNodes()
     {
         return allNodes;

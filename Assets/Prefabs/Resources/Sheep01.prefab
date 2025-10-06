@@ -3662,6 +3662,7 @@ GameObject:
   - component: {fileID: 4658312525212981492}
   - component: {fileID: 6414291846817395015}
   - component: {fileID: 5820903241924781567}
+  - component: {fileID: 8569411379368691725}
   - component: {fileID: 8398432111455139422}
   - component: {fileID: 3272501988663322847}
   - component: {fileID: 7615168237345159379}
@@ -3764,6 +3765,20 @@ MonoBehaviour:
     Attack: 0
     Defense: 0
   Level: 0
+--- !u!114 &8569411379368691725
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7180115301140830008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 513f7271013d7eb4abbca72a72826231, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  size: {x: 1, y: 1, z: 1}
+  segmentIndex: 0
 --- !u!114 &8398432111455139422
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4592,11 +4607,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3660182278034667714, guid: fec47fabe41c0164a902b443010f69c2, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -1.0300293
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3660182278034667714, guid: fec47fabe41c0164a902b443010f69c2, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 1.2449951
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3660182278034667714, guid: fec47fabe41c0164a902b443010f69c2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

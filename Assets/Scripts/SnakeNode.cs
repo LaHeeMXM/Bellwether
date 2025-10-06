@@ -18,13 +18,13 @@ public class SnakeNode : MonoBehaviour
         transform.localScale = size;
     }
 
-    public void SetModel(GameObject newInstance)
-    {
-        modelInstance = newInstance;
-        modelInstance.transform.SetParent(transform);
-        modelInstance.transform.localPosition = Vector3.zero;
-        modelInstance.transform.localRotation = Quaternion.identity;
-    }
+    //public void SetModel(GameObject newInstance)
+    //{
+    //    modelInstance = newInstance;
+    //    modelInstance.transform.SetParent(transform);
+    //    modelInstance.transform.localPosition = Vector3.zero;
+    //    modelInstance.transform.localRotation = Quaternion.identity;
+    //}
     /// <summary>
     /// 更新节点的尺寸。
     /// </summary>
@@ -33,4 +33,7 @@ public class SnakeNode : MonoBehaviour
         size = newSize;
         transform.localScale = size;
     }
+
+
+
 }

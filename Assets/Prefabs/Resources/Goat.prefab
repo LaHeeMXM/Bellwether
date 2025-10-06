@@ -3295,7 +3295,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8a197b663e1790e41a48e0defe752fd5, type: 2}
+  - {fileID: 2100000, guid: 1338ed4362e5e4748ac85874a29e4c6c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3381,7 +3381,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8a197b663e1790e41a48e0defe752fd5, type: 2}
+  - {fileID: 2100000, guid: 1338ed4362e5e4748ac85874a29e4c6c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3669,7 +3669,7 @@ GameObject:
   - component: {fileID: 3847088543891683395}
   - component: {fileID: 772748331713968855}
   m_Layer: 0
-  m_Name: Sheep02
+  m_Name: Goat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3752,14 +3752,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sheepPrefab: {fileID: 0}
-  buffName: DEF
+  buffName: ATK
   buffParam:
-    a: 2
-    b: 1
+    a: 1
+    b: 0
   baseAttribute:
-    Health: 5
-    Attack: 2
-    Defense: 2
+    Health: 6
+    Attack: 5
+    Defense: 0
   finalAttribute:
     Health: 0
     Attack: 0

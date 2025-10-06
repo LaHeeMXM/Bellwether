@@ -30,7 +30,10 @@ public class BattleNode : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
     [HideInInspector]
     public GameObject sheepPrefab;
+
+    public string sheepName;
     public string buffName;
+
     public BuffParams buffParam;
 
     //基础属性

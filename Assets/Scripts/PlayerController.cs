@@ -29,7 +29,7 @@ public class PlayerController : MonoBehaviour
             battleHead = headInstance.GetComponent<BattleHead>();
             snakeHead.isPlayer = true;
             battleHead.isPlayer = true;
-            battleHead.AddSheep("Sheep01");
+            battleHead.AddSheep("ATK");
             cineCamera.Follow = snakeHead.GetAllNodes()[0].transform;
 
             if (snakeHead.isPlayer && snakeHead.GetAllNodes().Count > 0)

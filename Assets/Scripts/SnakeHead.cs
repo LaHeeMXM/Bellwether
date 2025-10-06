@@ -2,42 +2,43 @@ using UnityEngine;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 
-/// <summary>
-/// 主要控制器：W前进，A/D旋转，身体跟随前一个节点。
-/// </summary>
+
 public class SnakeHead : MonoBehaviour
 {
     public bool isPlayer;
 
     [Header("速度与加速度")]
-    public float walkSpeed = 2.5f;       // 按下W时的目标速度
-    public float runSpeed = 5f;        // 按下W+空格时的目标速度
-    public float acceleration = 2f;      // 加速度 (单位/秒²)
-    public float deceleration = 4f;      // 减速度 (单位/秒²)
+    public float walkSpeed = 2.5f;
+    public float runSpeed = 5f;
+    public float acceleration = 2f;
+    public float deceleration = 4f;
 
     [Header("操控")]
     public float headRotationSpeed = 150f;
 
     [Header("身体跟随")]
+    [Tooltip("身体节点跟随/旋转平滑追赶的因子。值越大，跟随越快。")]
     public float bodyFollowRate = 7f;
+    [Tooltip("相邻两个节点中心点之间的理想最小距离（世界单位）")]
     public float absoluteNodeSpacing = 1.0f;
 
+    // --- 私有变量 ---
     private readonly List<SnakeNode> allNodes = new List<SnakeNode>();
     private readonly List<Rigidbody> allNodeRigidbodies = new List<Rigidbody>();
-    private float _currentSpeed = 0f; // 当前蛇头的实际速度
-
+    private float _currentSpeed = 0f;
     private Rigidbody _headRigidbody;
 
+    // 使用FixedUpdate处理所有物理相关的逻辑
     void FixedUpdate()
     {
         if (!isPlayer) return;
         if (allNodes.Count == 0)
         {
-            // 如果没有节点了，确保速度归零
             _currentSpeed = 0;
             return;
         }
 
+        // 确保我们总是在控制正确的蛇头
         _headRigidbody = allNodeRigidbodies[0];
 
         (float moveInput, float rotateInput, bool isRunning) = HandleInput();
@@ -47,6 +48,7 @@ public class SnakeHead : MonoBehaviour
         BroadcastSpeedToAllNodes();
     }
 
+    // 处理 W A D 和 Space 输入
     (float move, float rotate, bool running) HandleInput()
     {
         float move = Input.GetKey(KeyCode.W) ? 1f : 0f;
@@ -58,37 +60,30 @@ public class SnakeHead : MonoBehaviour
         return (move, rotate, running);
     }
 
-
+    // 平滑加减速逻辑
     void UpdateSpeed(float moveInput, bool isRunning)
     {
         float targetSpeed = 0f;
-
-        // 如果有前进输入
         if (moveInput > 0)
         {
-            // 根据是否按住空格，确定目标速度
             targetSpeed = isRunning ? runSpeed : walkSpeed;
         }
 
-        // 根据当前速度和目标速度的差距，决定是加速还是减速
         if (_currentSpeed < targetSpeed)
         {
-            // 加速
-            _currentSpeed += acceleration * Time.fixedDeltaTime;
-            // 防止超速
-            _currentSpeed = Mathf.Min(_currentSpeed, targetSpeed);
+            _currentSpeed = Mathf.Min(_currentSpeed + acceleration * Time.fixedDeltaTime, targetSpeed);
         }
         else if (_currentSpeed > targetSpeed)
         {
-            // 减速
-            _currentSpeed -= deceleration * Time.fixedDeltaTime;
-            // 防止速度低于目标值（特别是减速到0时）
-            _currentSpeed = Mathf.Max(_currentSpeed, targetSpeed);
+            _currentSpeed = Mathf.Max(_currentSpeed - deceleration * Time.fixedDeltaTime, targetSpeed);
         }
     }
 
+    // 更新蛇头的位置和旋转
     void UpdateHead(float rotateInput)
     {
+        if (_headRigidbody == null) return;
+
         // 旋转
         if (_currentSpeed > 0.1f && rotateInput != 0)
         {
@@ -101,21 +96,7 @@ public class SnakeHead : MonoBehaviour
         _headRigidbody.MovePosition(targetPosition);
     }
 
-    void BroadcastSpeedToAllNodes()
-    {
-        // 蛇头也需要更新自己的动画
-        allNodes[0].GetComponent<SheepAnimation>()?.UpdateMovementAnimation(_currentSpeed);
-
-        // 身体节点的速度可以稍微延迟或打折，以产生更自然的摆动效果
-        // 但最简单的实现是所有节点速度一致
-        for (int i = 1; i < allNodes.Count; i++)
-        {
-            // 身体的速度就是蛇头的速度
-            allNodes[i].GetComponent<SheepAnimation>()?.UpdateMovementAnimation(_currentSpeed);
-        }
-    }
-
-
+    // 更新身体节点的位置和旋转
     void UpdateBodyPositions()
     {
         for (int i = 1; i < allNodes.Count; i++)
@@ -126,65 +107,53 @@ public class SnakeHead : MonoBehaviour
             Vector3 currentPos = currentRigidbody.position;
             Vector3 previousPos = previousRigidbody.position;
 
-            // 1. 位置追赶逻辑 (保持间距)
-            float requiredDistance = absoluteNodeSpacing;
+            // 位置追赶逻辑
             float distance = Vector3.Distance(currentPos, previousPos);
-
-            Vector3 targetPosition = currentPos; // 默认目标位置是当前位置
-
-            if (distance > requiredDistance)
+            if (distance > absoluteNodeSpacing)
             {
-                Vector3 directionToPrevious = (previousPos - currentPos).normalized;
-                targetPosition = currentPos + directionToPrevious * (distance - requiredDistance);
-            }
-            else if (distance < requiredDistance * 0.9f)
-            {
-                Vector3 separateDirection = (currentPos - previousPos).normalized;
-                targetPosition = currentPos + separateDirection * (requiredDistance * 0.9f - distance);
+                Vector3 targetFollowPoint = previousPos - (previousPos - currentPos).normalized * absoluteNodeSpacing;
+                Vector3 newPosition = Vector3.Lerp(currentPos, targetFollowPoint, Time.fixedDeltaTime * bodyFollowRate);
+                currentRigidbody.MovePosition(newPosition);
             }
 
-            currentRigidbody.MovePosition(targetPosition);
-
-            // --- 朝向追赶逻辑 ---
+            // 朝向追赶逻辑
             Vector3 lookVector = previousPos - currentPos;
             if (lookVector.sqrMagnitude > 0.0001f)
             {
+                lookVector.y = 0;
                 Quaternion targetRotation = Quaternion.LookRotation(lookVector);
-                // 使用Slerp计算目标旋转，然后用MoveRotation应用
-                Quaternion newRotation = Quaternion.Slerp(
-                    currentRigidbody.rotation,
-                    targetRotation,
-                    Time.deltaTime * bodyFollowRate
-                );
+                Quaternion newRotation = Quaternion.Slerp(currentRigidbody.rotation, targetRotation, Time.fixedDeltaTime * bodyFollowRate);
                 currentRigidbody.MoveRotation(newRotation);
             }
         }
     }
 
-    /// <summary>
-    /// 实例化传入的预制体，并将其作为新的身体节点添加到蛇尾。并返回蛇节点
-    /// </summary>
+    // 将速度广播给所有节点以更新动画
+    void BroadcastSpeedToAllNodes()
+    {
+        for (int i = 0; i < allNodes.Count; i++)
+        {
+            allNodes[i].GetComponent<SheepAnimation>()?.UpdateMovementAnimation(_currentSpeed);
+        }
+    }
+
+    // 将已实例化的节点添加到物理列表
     public void AddNodeToList(SnakeNode newNode)
     {
         int newIndex = allNodes.Count;
         newNode.segmentIndex = newIndex;
 
-        // 第一个节点（蛇头）的特殊处理
         if (newIndex == 0)
         {
-            newNode.transform.SetParent(transform.parent); // 放在与 "Head" 同级
+            newNode.transform.SetParent(transform.parent);
             newNode.transform.position = transform.position;
             newNode.transform.rotation = transform.rotation;
         }
-
-        // 后续身体节点的处理
         else
         {
             SnakeNode lastNode = allNodes[newIndex - 1];
-
             Vector3 newPosition = lastNode.transform.position - lastNode.transform.forward.normalized * absoluteNodeSpacing;
-
-            newNode.transform.SetParent(transform.parent); // 放在与 "Head" 同级
+            newNode.transform.SetParent(transform.parent);
             newNode.transform.position = newPosition;
             newNode.transform.rotation = lastNode.transform.rotation;
         }
@@ -193,15 +162,13 @@ public class SnakeHead : MonoBehaviour
         allNodeRigidbodies.Add(newNode.GetComponent<Rigidbody>());
     }
 
-
-
+    // 从物理列表中移除节点
     public void RemoveNodeFromList(SnakeNode nodeToRemove)
     {
         int index = allNodes.IndexOf(nodeToRemove);
         if (index != -1)
         {
             allNodes.RemoveAt(index);
-            // 移除Rigidbody引用
             allNodeRigidbodies.RemoveAt(index);
         }
     }
@@ -211,6 +178,7 @@ public class SnakeHead : MonoBehaviour
         return allNodes;
     }
 
+    // ✨ 瞬时交换Transform以提供即时视觉反馈
     public void SwapNodeTransforms(int index1, int index2)
     {
         if (index1 < 0 || index1 >= allNodes.Count || index2 < 0 || index2 >= allNodes.Count)
@@ -219,21 +187,27 @@ public class SnakeHead : MonoBehaviour
             return;
         }
 
-        // 交换物理节点列表
+        // 1. 交换列表中的引用
         SnakeNode tempNode = allNodes[index1];
         allNodes[index1] = allNodes[index2];
         allNodes[index2] = tempNode;
 
-        // 交换Rigidbody缓存列表
         Rigidbody tempRb = allNodeRigidbodies[index1];
         allNodeRigidbodies[index1] = allNodeRigidbodies[index2];
         allNodeRigidbodies[index2] = tempRb;
 
-        // --- 不再有任何操作Transform的代码 ---
-        // 这将允许UpdateBodyPositions()来平滑处理位置变化
+        // 2. 交换实际的Transform
+        // 注意：此时列表中的对象已经交换，所以t1获取的是交换后的allNodes[index1]
+        Transform t1 = allNodes[index1].transform;
+        Transform t2 = allNodes[index2].transform;
 
-        Debug.Log($"物理节点列表已交换 {index1} 和 {index2}。");
+        Vector3 tempPos = t1.position;
+        Quaternion tempRot = t1.rotation;
+
+        t1.position = t2.position;
+        t1.rotation = t2.rotation;
+
+        t2.position = tempPos;
+        t2.rotation = tempRot;
     }
-
-
 }

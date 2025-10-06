@@ -129,7 +129,8 @@ public class BattleNode : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         int assistance = 0;
         int k = 2;
         //计算增援数值
-        for (int i = _index; i < _head.GetList().Count; i++)
+
+        for (int i = _index+1; i < _head.GetList().Count; i++)
         {
             assistance += _head.GetList()[i].finalAttribute.Attack / k;
             k *= 2;

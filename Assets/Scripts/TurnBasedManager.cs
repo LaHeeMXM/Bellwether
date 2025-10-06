@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -25,12 +25,12 @@ public class TurnBasedManager : MonoBehaviour
     public  enum BattleState { START, PLAYERTURN, ENEMYTURN, WON, LOST, PAUSED }
     public  BattleState currentState;
 
-    private bool isRescuePossible = false; // ±¾³¡Õ½¶·ÊÇ·ñ¿ÉÄÜ´¥·¢¾ÈÔ®
-    private int rescueDistance;            // ¾ÈÔ®ÉßÍ·Ê£ÓàµÄ¡°Â·³Ì¡±
-    private float turnCounter = 0.5f;           // ÓÃÓÚ¼ÆËã¾ÈÔ®ËÙ¶ÈµÄ»ØºÏ¼ÆÊıÆ÷
+    private bool isRescuePossible = false; // æœ¬åœºæˆ˜æ–—æ˜¯å¦å¯èƒ½è§¦å‘æ•‘æ´
+    private int rescueDistance;            // æ•‘æ´è›‡å¤´å‰©ä½™çš„â€œè·¯ç¨‹â€
+    private float turnCounter = 0.5f;           // ç”¨äºè®¡ç®—æ•‘æ´é€Ÿåº¦çš„å›åˆè®¡æ•°å™¨
     private bool wasRescueTriggered = false;
 
-    [Header("¾ÈÔ®¶¯»­ÉèÖÃ")]
+    [Header("æ•‘æ´åŠ¨ç”»è®¾ç½®")]
     public float swapAnimationDuration = 1.5f;
     public float swapJumpHeight = 2.0f;
 
@@ -49,7 +49,7 @@ public class TurnBasedManager : MonoBehaviour
         this.playerUnitModel = playerModel;
         this.enemyUnitModel = enemyModel;
 
-        //ÔÚÕ½¶·¿ªÊ¼Ç°£¬Í¨ÖªÁ½¸öµ¥Î»½øÈëÕ½¶·×´Ì¬
+        //åœ¨æˆ˜æ–—å¼€å§‹å‰ï¼Œé€šçŸ¥ä¸¤ä¸ªå•ä½è¿›å…¥æˆ˜æ–—çŠ¶æ€
         this.playerUnitModel.GetComponent<SheepAnimation>()?.EnterCombatState();
         this.enemyUnitModel.GetComponent<SheepAnimation>()?.EnterCombatState();
 
@@ -72,7 +72,7 @@ public class TurnBasedManager : MonoBehaviour
         UIBattleManager.Instance.InitializeUI(playerBattleData, enemyBattleData);
 
 
-        // - ¾ÈÔ®»úÖÆ³õÊ¼»¯ -
+        // - æ•‘æ´æœºåˆ¶åˆå§‹åŒ– -
 
         CombatantData targetNodeData = CombatManager.Instance.targetNodeData;
 
@@ -80,18 +80,18 @@ public class TurnBasedManager : MonoBehaviour
         {
             isRescuePossible = true;
             rescueDistance = targetNodeData.Location;
-            turnCounter = 0; // ÖØÖÃ»ØºÏ¼ÆÊıÆ÷
-            Debug.Log("¾ÈÔ®»úÖÆÒÑ¼¤»î£¡³õÊ¼¾àÀë: " + rescueDistance);
+            turnCounter = 0; // é‡ç½®å›åˆè®¡æ•°å™¨
+            Debug.Log("æ•‘æ´æœºåˆ¶å·²æ¿€æ´»ï¼åˆå§‹è·ç¦»: " + rescueDistance);
         }
         else
         {
             isRescuePossible = false;
-            Debug.Log("Ë«·½ÉßÍ·½»Õ½£¬²»´¥·¢¾ÈÔ®»úÖÆ¡£");
+            Debug.Log("åŒæ–¹è›‡å¤´äº¤æˆ˜ï¼Œä¸è§¦å‘æ•‘æ´æœºåˆ¶ã€‚");
         }
 
         UIBattleManager.Instance.InitializeSupportUI(isRescuePossible, CombatManager.Instance.isTargetNodePlayer, rescueDistance);
 
-        // - ¾ÈÔ®»úÖÆ³õÊ¼»¯½áÊø -
+        // - æ•‘æ´æœºåˆ¶åˆå§‹åŒ–ç»“æŸ -
 
         currentState = BattleState.START;
         StartCoroutine(BattleFlow());
@@ -100,10 +100,10 @@ public class TurnBasedManager : MonoBehaviour
     IEnumerator BattleFlow()
     {
 
-        Debug.Log("»ØºÏ¿ªÊ¼");
+        Debug.Log("å›åˆå¼€å§‹");
         yield return new WaitForSeconds(1f);
 
-        // Ö÷¶¯¹¥»÷ÔòÏÈÊÖ
+        // ä¸»åŠ¨æ”»å‡»åˆ™å…ˆæ‰‹
         currentState = isPlayerFirst? BattleState.PLAYERTURN : BattleState.ENEMYTURN;
 
         wasRescueTriggered = false;
@@ -119,17 +119,31 @@ public class TurnBasedManager : MonoBehaviour
             if (currentState == BattleState.PLAYERTURN)
             {
                 yield return StartCoroutine(AttackRoutine(playerBattleData, enemyBattleData, playerUnitModel, enemyUnitModel));
-                if (enemyBattleData.Health <= 0) currentState = BattleState.WON;
-                else currentState = BattleState.ENEMYTURN;
+                if (enemyBattleData.Health <= 0)
+                {
+                    currentState = BattleState.WON;
+                    continue;
+                }
+                else
+                {
+                    currentState = BattleState.ENEMYTURN;
+                }
             }
             else if (currentState == BattleState.ENEMYTURN)
             {
                 yield return StartCoroutine(AttackRoutine(enemyBattleData, playerBattleData, enemyUnitModel, playerUnitModel));
-                if (playerBattleData.Health <= 0) currentState = BattleState.LOST;
-                else currentState = BattleState.PLAYERTURN;
+                if (playerBattleData.Health <= 0)
+                {
+                    currentState = BattleState.LOST;
+                    continue;
+                }
+                else
+                {
+                    currentState = BattleState.PLAYERTURN;
+                }
             }
 
-            if (isRescuePossible)
+            if (isRescuePossible && currentState != BattleState.WON && currentState != BattleState.LOST)
             {
                 turnCounter += 0.5f;
 
@@ -154,9 +168,9 @@ public class TurnBasedManager : MonoBehaviour
 
     IEnumerator AttackRoutine(BattleUnit attacker, BattleUnit defender, GameObject attackerModel, GameObject defenderModel)
     {
-        // --- ¹¥»÷·½¶¯»­ ---
+        // --- æ”»å‡»æ–¹åŠ¨ç”» ---
 
-        Debug.Log(attacker.unitName + " ·¢Æğ¹¥»÷!");
+        Debug.Log(attacker.unitName + " å‘èµ·æ”»å‡»!");
         SheepAnimation attackerAnim = attackerModel.GetComponent<SheepAnimation>();
 
         if (attackerAnim != null)
@@ -167,7 +181,7 @@ public class TurnBasedManager : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
 
 
-        // --- ÉËº¦½áËã ---
+        // --- ä¼¤å®³ç»“ç®— ---
 
         int damageDealt = Mathf.Max(1, attacker.Attack - defender.Defense);
         defender.Health -= damageDealt;
@@ -181,19 +195,19 @@ public class TurnBasedManager : MonoBehaviour
             UIBattleManager.Instance.OnDataChange(UIBattleManager.Instance.enemyHealthText, defender.Health);
         }
 
-        Debug.Log(defender.unitName + " ÊÜµ½ " + damageDealt + " ÉËº¦, Ê£ÓàÉúÃü: " + defender.Health);
+        Debug.Log(defender.unitName + " å—åˆ° " + damageDealt + " ä¼¤å®³, å‰©ä½™ç”Ÿå‘½: " + defender.Health);
 
 
-        // --- ÊÜ»÷·½¶¯»­ ---
+        // --- å—å‡»æ–¹åŠ¨ç”» ---
 
         SheepAnimation defenderAnim = defenderModel.GetComponent<SheepAnimation>();
 
         if (defenderAnim != null)
         {
-            // ÅĞ¶ÏÊÇ²¥·ÅËÀÍö»¹ÊÇÊÜ»÷¶¯»­
+            // åˆ¤æ–­æ˜¯æ’­æ”¾æ­»äº¡è¿˜æ˜¯å—å‡»åŠ¨ç”»
             if (defender.Health <= 0)
             {
-                Debug.Log(defender.unitName + " ±»»÷°ÜÁË!");
+                Debug.Log(defender.unitName + " è¢«å‡»è´¥äº†!");
                 defenderAnim.PlayDeath();
             }
             else
@@ -202,10 +216,10 @@ public class TurnBasedManager : MonoBehaviour
             }
         }
 
-        // µÈ¶¯»­
+        // ç­‰åŠ¨ç”»
         yield return new WaitForSeconds(1.0f);
 
-        // »ØºÏ¼äÍ£¶Ù
+        // å›åˆé—´åœé¡¿
         yield return new WaitForSeconds(0.5f);
 
     }
@@ -227,55 +241,55 @@ public class TurnBasedManager : MonoBehaviour
     IEnumerator TriggerRescue()
     {
         UIBattleManager.Instance.ShowArrivalMessage();
-        currentState = BattleState.PAUSED; // ÔİÍ£Õ½¶·Á÷³ÌÒÔ½øĞĞË¢ĞÂ
+        currentState = BattleState.PAUSED; // æš‚åœæˆ˜æ–—æµç¨‹ä»¥è¿›è¡Œåˆ·æ–°
         wasRescueTriggered = true;
 
-        yield return new WaitForSeconds(1f); // Áô³öÍ£¶Ù
+        yield return new WaitForSeconds(1f); // ç•™å‡ºåœé¡¿
 
-        // ÅĞ¶ÏÊÇÄÄÒ»·½±»¾ÈÔ®
+        // åˆ¤æ–­æ˜¯å“ªä¸€æ–¹è¢«æ•‘æ´
         bool isPlayerSideRescued = CombatManager.Instance.isTargetNodePlayer;
 
         if (isPlayerSideRescued)
         {
-            Debug.Log("Íæ¼ÒµÄÉßÍ·µÖ´ïÕ½³¡£¡");
-            // »ñÈ¡´ıÃüµÄÍæ¼ÒÉßÍ·Êı¾İ
+            Debug.Log("ç©å®¶çš„è›‡å¤´æŠµè¾¾æˆ˜åœºï¼");
+            // è·å–å¾…å‘½çš„ç©å®¶è›‡å¤´æ•°æ®
             CombatantData rescuingHeadData = CombatManager.Instance.playerHeadData;
 
-            // --- Êı¾İË¢ĞÂ ---
+            // --- æ•°æ®åˆ·æ–° ---
             playerBattleData.unitName = rescuingHeadData.unitName;
-            playerBattleData.Health = rescuingHeadData.Health; // Ë¢ĞÂÎªÂúÑª
+            playerBattleData.Health = rescuingHeadData.Health; // åˆ·æ–°ä¸ºæ»¡è¡€
             playerBattleData.Attack = rescuingHeadData.Attack + rescuingHeadData.Assistance;
             playerBattleData.Defense = rescuingHeadData.Defense;
 
-            // --- Ä£ĞÍË¢ĞÂ ---
+            // --- æ¨¡å‹åˆ·æ–° ---
             yield return StartCoroutine(AnimateModelSwap(playerUnitModel, rescuingHeadData.unitPrefab, (newModel) => {
-                playerUnitModel = newModel; // ¸üĞÂÎÒÃÇÖ÷ÒªµÄÄ£ĞÍÒıÓÃ
+                playerUnitModel = newModel; // æ›´æ–°æˆ‘ä»¬ä¸»è¦çš„æ¨¡å‹å¼•ç”¨
             }));
         }
-        else // µĞÈË·½±»¾ÈÔ®
+        else // æ•Œäººæ–¹è¢«æ•‘æ´
         {
-            Debug.Log("µĞÈËµÄÉßÍ·µÖ´ïÕ½³¡£¡");
-            // »ñÈ¡´ıÃüµÄµĞÈËÉßÍ·Êı¾İ
+            Debug.Log("æ•Œäººçš„è›‡å¤´æŠµè¾¾æˆ˜åœºï¼");
+            // è·å–å¾…å‘½çš„æ•Œäººè›‡å¤´æ•°æ®
             CombatantData rescuingHeadData = CombatManager.Instance.enemyHeadData;
 
-            // --- Êı¾İË¢ĞÂ ---
+            // --- æ•°æ®åˆ·æ–° ---
             enemyBattleData.unitName = rescuingHeadData.unitName;
             enemyBattleData.Health = rescuingHeadData.Health;
             enemyBattleData.Attack = rescuingHeadData.Attack + rescuingHeadData.Assistance;
             enemyBattleData.Defense = rescuingHeadData.Defense;
 
-            // --- Ä£ĞÍË¢ĞÂ ---
+            // --- æ¨¡å‹åˆ·æ–° ---
             yield return StartCoroutine(AnimateModelSwap(enemyUnitModel, rescuingHeadData.unitPrefab, (newModel) => {
-                enemyUnitModel = newModel; // ¸üĞÂÎÒÃÇÖ÷ÒªµÄÄ£ĞÍÒıÓÃ
+                enemyUnitModel = newModel; // æ›´æ–°æˆ‘ä»¬ä¸»è¦çš„æ¨¡å‹å¼•ç”¨
             }));
         }
 
-        // ³õÊ¼»¯º¯ÊıÀ´Ò»´ÎĞÔË¢ĞÂËùÓĞUI
+        // åˆå§‹åŒ–å‡½æ•°æ¥ä¸€æ¬¡æ€§åˆ·æ–°æ‰€æœ‰UI
         UIBattleManager.Instance.InitializeUI(playerBattleData, enemyBattleData);
 
-        yield return new WaitForSeconds(2.0f); // Í£¶Ù£¬ÈÃÍæ¼Ò¿´Çå±ä»¯
+        yield return new WaitForSeconds(2.0f); // åœé¡¿ï¼Œè®©ç©å®¶çœ‹æ¸…å˜åŒ–
 
-        // Ë¢ĞÂÍê±Ï£¬½«Õ½¶·Á÷³Ì½»»¹¸øµ±Ç°»ØºÏµÄĞĞ¶¯·½
+        // åˆ·æ–°å®Œæ¯•ï¼Œå°†æˆ˜æ–—æµç¨‹äº¤è¿˜ç»™å½“å‰å›åˆçš„è¡ŒåŠ¨æ–¹
         currentState = isPlayerFirst ? BattleState.PLAYERTURN : BattleState.ENEMYTURN;
     }
 
@@ -283,7 +297,7 @@ public class TurnBasedManager : MonoBehaviour
     {
         float elapsedTime = 0f;
         Vector3 startPosition = oldModel.transform.position;
-        Quaternion startRotation = oldModel.transform.rotation; // ¼ÇÂ¼Ô­Ê¼³¯Ïò
+        Quaternion startRotation = oldModel.transform.rotation; // è®°å½•åŸå§‹æœå‘
 
         GameObject currentModel = oldModel;
         GameObject newModelInstance = null;
@@ -294,20 +308,20 @@ public class TurnBasedManager : MonoBehaviour
             elapsedTime += Time.deltaTime;
             float progress = Mathf.Clamp01(elapsedTime / swapAnimationDuration);
 
-            // --- Æ½»¬»º¶¯µÄ½ø¶ÈÖµ (ÓÃÓÚĞı×ª) ---
-            // SmoothStep»áÈÃ½ø¶ÈÔÚ¿ªÊ¼ºÍ½áÊøÊ±ËÙ¶ÈÎª0£¬ÖĞ¼ä×î¿ì
+            // --- å¹³æ»‘ç¼“åŠ¨çš„è¿›åº¦å€¼ (ç”¨äºæ—‹è½¬) ---
+            // SmoothStepä¼šè®©è¿›åº¦åœ¨å¼€å§‹å’Œç»“æŸæ—¶é€Ÿåº¦ä¸º0ï¼Œä¸­é—´æœ€å¿«
             float easedProgress = Mathf.SmoothStep(0, 1, progress);
 
-            // --- ¼ÆËãÎ»ÖÃ (ÌøÔ¾»¡Ïß£¬±¾Éí¾ÍÊÇÆ½»¬µÄ) ---
+            // --- è®¡ç®—ä½ç½® (è·³è·ƒå¼§çº¿ï¼Œæœ¬èº«å°±æ˜¯å¹³æ»‘çš„) ---
             float jumpHeight = Mathf.Sin(progress * Mathf.PI) * swapJumpHeight;
             currentModel.transform.position = startPosition + new Vector3(0, jumpHeight, 0);
 
-            // --- ¼ÆËãÏà¶ÔĞı×ª ---
+            // --- è®¡ç®—ç›¸å¯¹æ—‹è½¬ ---
             float rotationY = easedProgress * 360f;
             Quaternion spinRotation = Quaternion.Euler(0, rotationY, 0);
             currentModel.transform.rotation = startRotation * spinRotation;
 
-            // --- ÇĞ»»Ä£ĞÍ ---
+            // --- åˆ‡æ¢æ¨¡å‹ ---
             if (progress >= 0.5f && !hasSwapped)
             {
                 hasSwapped = true;
@@ -322,7 +336,7 @@ public class TurnBasedManager : MonoBehaviour
             yield return null;
         }
 
-        // --- ÇåÀí¹¤×÷ ---
+        // --- æ¸…ç†å·¥ä½œ ---
         currentModel.transform.position = startPosition;
         currentModel.transform.rotation = startRotation;
 
@@ -334,45 +348,48 @@ public class TurnBasedManager : MonoBehaviour
     IEnumerator EndBattleCoroutine()
     {
         CombatResultType result;
-        CombatantData defeatedNode = null;
-        bool playerLostAllNodes = false;
+        CombatantData finalDefeatedNode = null; // ç”¨äºæœ€ç»ˆä¼ é€’ç»™CombatManagerçš„æ•°æ®
 
         if (currentState == BattleState.WON)
         {
-            Debug.Log("Ê¤Àû");
+            Debug.Log("èƒœåˆ©");
             result = CombatResultType.PlayerWon;
-            // ±»»÷°ÜµÄÊÇµĞÈË£¬ÎÒÃÇĞèÒªËüµÄÔ­Ê¼Êı¾İ
-            // Èç¹ûµĞÈË±»¾ÈÔ®£¬ÄÇÃ´±»»÷°ÜµÄÊÇµĞÈËÉßÍ·£»·ñÔòÊÇ±»¹¥»÷µÄ½Úµã
-            defeatedNode = wasRescueTriggered ? CombatManager.Instance.enemyHeadData : CombatManager.Instance.targetNodeData;
+
+            // èƒœåˆ©æ—¶ï¼Œè¢«å‡»è´¥çš„ä¸€å®šæ˜¯æ•Œäººã€‚
+            // æˆ‘ä»¬éœ€è¦åˆ¤æ–­è¢«å‡»è´¥çš„æ˜¯æ•‘æ´çš„è›‡å¤´ï¼Œè¿˜æ˜¯æœ€åˆçš„ç›®æ ‡èŠ‚ç‚¹ã€‚
+            finalDefeatedNode = wasRescueTriggered ? CombatManager.Instance.enemyHeadData : CombatManager.Instance.targetNodeData;
         }
         else // LOST
         {
-            Debug.Log("Ê§°Ü");
-            result = CombatResultType.EnemyWon;
-            defeatedNode = wasRescueTriggered ? CombatManager.Instance.playerHeadData : CombatManager.Instance.targetNodeData;
+            Debug.Log("å¤±è´¥");
 
-            // ¼ì²éÍæ¼ÒÊÇ·ñÈ«¾ü¸²Ã» (Ö»ÓĞÔÚÍæ¼ÒÉßÍ·²ÎÕ½²¢Ê§°ÜÊ±)
-            bool isPlayerNodeTarget = CombatManager.Instance.isTargetNodePlayer;
-            if ((!isPlayerNodeTarget && wasRescueTriggered) || (isPlayerNodeTarget && !wasRescueTriggered && defeatedNode.Location == 0))
+            // å¤±è´¥æ—¶ï¼Œè¢«å‡»è´¥çš„ä¸€å®šæ˜¯ç©å®¶ã€‚
+            CombatantData playerNodeInCombat = CombatManager.Instance.isTargetNodePlayer ? CombatManager.Instance.targetNodeData : CombatManager.Instance.playerHeadData;
+            if (wasRescueTriggered)
             {
-                // ¸´ÔÓÅĞ¶Ï£º1.µĞÈËÍµÏ®Íæ¼Ò£¬¾ÈÔ®µÖ´ïºóÍæ¼ÒÉßÍ·Õ½°Ü¡£ 2.Íæ¼ÒÍµÏ®µĞÈËÉíÌå£¬µ«±»·´É±£¬¶øÄÇ¸öÉíÌå¸ÕºÃÊÇÉßÍ·
-                // ¸ü¼òµ¥µÄÅĞ¶Ï£º±»»÷°ÜµÄ½ÚµãÊÇÍæ¼ÒÉßÍ·
-                if (defeatedNode == CombatManager.Instance.playerHeadData)
-                {
-                    playerLostAllNodes = true;
-                    result = CombatResultType.PlayerAnnihilated;
-                }
+                playerNodeInCombat = CombatManager.Instance.playerHeadData; // å¦‚æœæ•‘æ´å·²è§¦å‘ï¼Œæˆ˜è´¥çš„ä¸€å®šæ˜¯ç©å®¶è›‡å¤´
+            }
+
+            // è¢«å‡»è´¥çš„ç©å®¶å•ä½ï¼Œæ˜¯ä¸æ˜¯è›‡å¤´ï¼Ÿ
+            if (playerNodeInCombat.Location == 0)
+            {
+                Debug.Log("ç©å®¶è›‡å¤´æˆ˜è´¥ï¼å…¨å†›è¦†æ²¡ï¼");
+                result = CombatResultType.PlayerAnnihilated;
+                finalDefeatedNode = playerNodeInCombat; // è®°å½•ä¸‹æˆ˜è´¥çš„è›‡å¤´
+            }
+            else
+            {
+                // åªæ˜¯æŸå¤±äº†ä¸€ä¸ªèº«ä½“èŠ‚ç‚¹ï¼Œä¸æ˜¯Game Over
+                result = CombatResultType.EnemyWon;
+                finalDefeatedNode = playerNodeInCombat;
             }
         }
 
-        Debug.Log("Õ½¶·½áÊø£¬µÈ´ı3Ãëºó·µ»ØÖ÷³¡¾°...");
+        Debug.Log("æˆ˜æ–—ç»“æŸï¼Œç­‰å¾…3ç§’åè¿”å›ä¸»åœºæ™¯...");
         yield return new WaitForSeconds(3.0f);
 
-        // µ÷ÓÃĞÅÊ¹£¬´ø×ÅÕ½±¨·µ»Ø
-        UIBattleManager.Instance.RestoreOriginalTimeScale(); // È·±£Ê±¼ä»Ö¸´Õı³£
-        CombatManager.Instance.EndCombat(result, wasRescueTriggered, defeatedNode);
+        UIBattleManager.Instance.RestoreOriginalTimeScale();
+        CombatManager.Instance.EndCombat(result, wasRescueTriggered, finalDefeatedNode);
         GameFlowManager.Instance.ReturnFromCombat();
     }
-
-
 }

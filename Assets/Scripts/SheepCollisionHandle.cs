@@ -13,6 +13,11 @@ public class SheepCollisionHandle : MonoBehaviour
             return;
         }
 
+        if (CombatManager.Instance != null && CombatManager.Instance.IsTransitioningToCombat)
+        {
+            return;
+        }
+
         var oppositeNode = info.collider.GetComponent<BattleNode>();
         var selfNode = GetComponent<BattleNode>();
 
@@ -45,6 +50,10 @@ public class SheepCollisionHandle : MonoBehaviour
         Debug.Log("Into Combat!");
         CombatManager.Instance.StartCombat(playerHeadData,enemyHeadData,targetNodeData,oppositeNode.IsPlayer());
 
-        GameFlowManager.Instance.GoToCombat();
+        if (CombatManager.Instance.IsTransitioningToCombat)
+        {
+            Debug.Log("Into Combat!");
+            GameFlowManager.Instance.GoToCombat();
+        }
     }
 }

@@ -565,7 +565,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8307515359986926073, guid: 7cc9b0559726b0f45bd05a58c0f20638, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 54.67171
+      value: -150
       objectReference: {fileID: 0}
     - target: {fileID: 8307515359986926073, guid: 7cc9b0559726b0f45bd05a58c0f20638, type: 3}
       propertyPath: m_LocalPosition.y
@@ -573,7 +573,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8307515359986926073, guid: 7cc9b0559726b0f45bd05a58c0f20638, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 42.839367
+      value: -160
       objectReference: {fileID: 0}
     - target: {fileID: 8307515359986926073, guid: 7cc9b0559726b0f45bd05a58c0f20638, type: 3}
       propertyPath: m_LocalRotation.w
@@ -644,13 +644,50 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyControllerPrefab: {fileID: 7535427451043552797, guid: 755f2eb465bf9f4469630e65eecdeffd, type: 3}
   headLogicPrefab: {fileID: 3502516732698775051, guid: 41e0b8db4afea1446ba850b773c98938, type: 3}
-  enemySnakesToSpawn:
-  - spawnPosition: {x: 10, y: 0, z: 10}
-    nodePrefabNames:
-    - HP
-    - ATKF
-    - DEFF
-    initialLevel: 1
+  unitSpawnPool:
+  - unitPrefab: {fileID: 2619609401422912754, guid: 628ef8ac3d82ca2439975cf1198e57e6, type: 3}
+    rarity: 0
+  - unitPrefab: {fileID: 5042041517489775737, guid: a76fc69a2221ba445a384907cbfbcf36, type: 3}
+    rarity: 0
+  - unitPrefab: {fileID: 7775960104014890216, guid: 88c51b5200a5d7d47be52bd8d975e326, type: 3}
+    rarity: 0
+  - unitPrefab: {fileID: 2018245735470942073, guid: 55b44958d08557041aa7e1d6c06260b2, type: 3}
+    rarity: 1
+  - unitPrefab: {fileID: 8327119746069012484, guid: c24e0b1e44d46f04598b78d2ba589960, type: 3}
+    rarity: 1
+  - unitPrefab: {fileID: 2407825659941783379, guid: 686ce65f1db746d44bde551a056be3d7, type: 3}
+    rarity: 2
+  - unitPrefab: {fileID: 1685592301057861864, guid: 9f616cb775197fa4ba61ef5c600bbe2e, type: 3}
+    rarity: 0
+  - unitPrefab: {fileID: 3876216093463624670, guid: 7b7fe94368472bf4f820de0fadc4ee7f, type: 3}
+    rarity: 0
+  - unitPrefab: {fileID: 1685592301057861864, guid: 1ea67293c8227484eb6473333796db78, type: 3}
+    rarity: 1
+  - unitPrefab: {fileID: 3876216093463624670, guid: 7adbb581b52e65c4488a94a54a39536b, type: 3}
+    rarity: 1
+  - unitPrefab: {fileID: 1685592301057861864, guid: f6d7f91adad6f2f40b99d25f8056447f, type: 3}
+    rarity: 0
+  - unitPrefab: {fileID: 3876216093463624670, guid: 2ded88c0b87fce94d9d20f6db90c28d6, type: 3}
+    rarity: 0
+  - unitPrefab: {fileID: 951594712603350528, guid: fe9caa1731741f549a4b81bfe7887763, type: 3}
+    rarity: 1
+  - unitPrefab: {fileID: 951594712603350528, guid: af4292e019f3e764a8663fc36a0a29af, type: 3}
+    rarity: 2
+  - unitPrefab: {fileID: 951594712603350528, guid: 7dbf12575b9ddde45aa939cf49b20ecd, type: 3}
+    rarity: 2
+  - unitPrefab: {fileID: 1246217606628378566, guid: b0163ec932e40fb45ad9913e520f42f4, type: 3}
+    rarity: 0
+  - unitPrefab: {fileID: 1246217606628378566, guid: 9a2aede82f40ef34388ce6a96c9175c7, type: 3}
+    rarity: 1
+  - unitPrefab: {fileID: 1246217606628378566, guid: 0efaea7af7b82e844b761df8bc257aa8, type: 3}
+    rarity: 0
+  mapSize: 200
+  centerSafeRadius: 25
+  innerRingRadius: 100
+  middleRingRadius: 150
+  initialEnemyCount: 50
+  maxEnemyCount: 80
+  respawnInterval: 15
 --- !u!4 &1986959254
 Transform:
   m_ObjectHideFlags: 0
@@ -754,7 +791,7 @@ Transform:
   m_GameObject: {fileID: 2112817388}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071157, y: -0.000014537923, z: -0, w: 0.70709795}
-  m_LocalPosition: {x: 54.672096, y: 18.739998, z: 42.839836}
+  m_LocalPosition: {x: -149.9996, y: 18.739998, z: -159.99953}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -875,7 +912,7 @@ Transform:
   m_GameObject: {fileID: 2124311597}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071235, y: -0.000027204927, z: -0, w: 0.70709}
-  m_LocalPosition: {x: 54.672096, y: 18.739998, z: 42.839836}
+  m_LocalPosition: {x: -149.9996, y: 18.739998, z: -159.99953}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

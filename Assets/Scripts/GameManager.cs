@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using System.Linq;
 
 [System.Serializable] 
 public class EnemySnakeConfig
@@ -15,20 +15,67 @@ public class EnemySnakeConfig
     public int initialLevel = 1;
 }
 
+public enum Rarity { N, R, S }  //稀有度
+
+[System.Serializable]
+
+public class UnitSpawnInfo
+{
+    [Tooltip("Prefab引用")]
+    public GameObject unitPrefab; 
+    [Tooltip("单位的稀有度")]
+    public Rarity rarity;
+}
+
+// 追踪已生成的敌人
+public class ActiveEnemy
+{
+    public GameObject rootObject; // 敌人蛇的父对象 (EnemyController所在的那个)
+    public BattleHead battleHead;
+
+    public ActiveEnemy(GameObject root, BattleHead head)
+    {
+        rootObject = root;
+        battleHead = head;
+    }
+}
+
 
 public class GameManager : MonoBehaviour
 {
     [Header("核心Prefabs")]
-    [Tooltip("代表'Enemy'父对象的Prefab，上面应该挂载EnemyController脚本")]
     public GameObject enemyControllerPrefab;
-    [Tooltip("代表'Head'逻辑对象的Prefab，上面挂载SnakeHead和BattleHead")]
     public GameObject headLogicPrefab;
 
-    [Header("敌人配置")]
-    [Tooltip("配置你想要在场景中生成的所有敌人蛇")]
-    public List<EnemySnakeConfig> enemySnakesToSpawn;
+    [Header("单位配置池")]
+    [Tooltip("在这里配置所有18种单位的Prefab和稀有度")]
+    public List<UnitSpawnInfo> unitSpawnPool;
 
-    private bool _isInitialized = false;
+    [Header("刷新区域设置")]
+    public float mapSize = 200f; // 地图边界的一半 (从-200到200)
+    public float centerSafeRadius = 25f; // 中心安全区半径
+    public float innerRingRadius = 100f; // 内环半径
+    public float middleRingRadius = 150f; // 中环半径
+
+    [Header("刷新数量与节奏")]
+    public int initialEnemyCount = 25; // 初始敌人数量
+    public int maxEnemyCount = 35; // 最大敌人数量
+    public float respawnInterval = 30f; // 刷新间隔（秒）
+
+    // --- 私有状态变量 ---
+    private List<ActiveEnemy> activeEnemies = new List<ActiveEnemy>();
+    private float respawnTimer = 0f;
+
+    // 用于按稀有度分类的单位池，方便抽卡
+    private List<GameObject> commonUnits; // N
+    private List<GameObject> rareUnits;   // R
+    private List<GameObject> superRareUnits; // S
+
+    void Awake()
+    {
+        // 在游戏开始时，对单位池进行预处理和分类
+        PreprocessUnitPool();
+    }
 
     void Start()
     {
@@ -37,55 +84,179 @@ public class GameManager : MonoBehaviour
 
     public void Initialize()
     {
-        if (_isInitialized) return; 
-
-        Debug.Log("GameManager 开始生成敌人...");
-        SpawnAllEnemies();
-        _isInitialized = true;
-    }
-
-    private void SpawnAllEnemies()
-    {
-        foreach (var config in enemySnakesToSpawn)
+        for (int i = 0; i < initialEnemyCount; i++)
         {
-            SpawnEnemySnake(config);
+            SpawnNewEnemy();
         }
     }
 
-    private void SpawnEnemySnake(EnemySnakeConfig config)
+    void Update()
     {
-        if (enemyControllerPrefab == null || headLogicPrefab == null)
+        // 动态刷新逻辑
+        if (activeEnemies.Count < maxEnemyCount)
         {
-            Debug.LogError("GameManager缺少核心Prefabs的引用！");
-            return;
+            respawnTimer += Time.deltaTime;
+            if (respawnTimer >= respawnInterval)
+            {
+                respawnTimer = 0f;
+                SpawnNewEnemy();
+            }
         }
 
-        // 创建 "Enemy" 父对象
-        GameObject enemyRoot = Instantiate(enemyControllerPrefab, config.spawnPosition, Quaternion.identity);
-        enemyRoot.name = "Enemy" + config.nodePrefabNames[0]; // 用蛇头名字来命名，方便调试
+        for (int i = activeEnemies.Count - 1; i >= 0; i--)
+        {
+            // 如果GameObject已经被销毁 (比如被CombatResultResolver销毁了)
+            if (activeEnemies[i].rootObject == null)
+            {
+                activeEnemies.RemoveAt(i);
+            }
+        }
+    }
 
-        // 获取EnemyController并初始化
+    // --- 核心实现方法 ---
+
+    private void PreprocessUnitPool()
+    {
+        commonUnits = unitSpawnPool.Where(u => u.rarity == Rarity.N).Select(u => u.unitPrefab).ToList();
+        rareUnits = unitSpawnPool.Where(u => u.rarity == Rarity.R).Select(u => u.unitPrefab).ToList();
+        superRareUnits = unitSpawnPool.Where(u => u.rarity == Rarity.S).Select(u => u.unitPrefab).ToList();
+
+        if (commonUnits.Count == 0 || rareUnits.Count == 0 || superRareUnits.Count == 0)
+        {
+            Debug.LogError("单位配置池中缺少至少一种稀有度的单位！");
+        }
+    }
+
+    private void SpawnNewEnemy()
+    {
+        // 1. 决定生成位置和所属区域
+        Vector3 spawnPosition = GetRandomSpawnPosition();
+        float distanceFromCenter = Vector3.Distance(spawnPosition, Vector3.zero);
+
+        // 2. 根据区域决定蛇的长度和等级范围
+        int minLength, maxLength, minLevel, maxLevel;
+
+        if (distanceFromCenter <= innerRingRadius) // 内环 (最强)
+        {
+            minLength = 5; maxLength = 18;
+            minLevel = 10; maxLevel = 35;
+        }
+        else if (distanceFromCenter <= middleRingRadius) // 中环
+        {
+            minLength = 3; maxLength = 8;
+            minLevel = 4; maxLevel = 12;
+        }
+        else // 外环 (最弱)
+        {
+            minLength = 1; maxLength = 3;
+            minLevel = 1; maxLevel = 5;
+        }
+
+        // 3. 随机确定最终的长度和等级
+        int snakeLength = Random.Range(minLength, maxLength + 1);
+        int snakeLevel = Random.Range(minLevel, maxLevel + 1);
+
+        // 4. 根据区域选择单位池，并构建蛇的节点列表
+        List<GameObject> bodyPrefabs = new List<GameObject>();
+        for (int i = 0; i < snakeLength; i++)
+        {
+            bodyPrefabs.Add(GetRandomUnitPrefabByZone(distanceFromCenter));
+        }
+
+        // 5. 生成蛇
+        SpawnEnemySnake(spawnPosition, bodyPrefabs, snakeLevel);
+    }
+
+    // 用于根据区域随机抽取单位
+    private GameObject GetRandomUnitPrefabByZone(float distance)
+    {
+        // 定义不同区域的抽卡概率 (N, R, S)
+        // 这些概率可以根据需要调整
+        float n_chance = 0f, r_chance = 0f, s_chance = 0f;
+
+        if (distance <= innerRingRadius) // 内环
+        {
+            n_chance = 0.2f; // 20%
+            r_chance = 0.5f; // 50%
+            s_chance = 0.3f; // 30%
+        }
+        else if (distance <= middleRingRadius) // 中环
+        {
+            n_chance = 0.5f; // 50%
+            r_chance = 0.4f; // 40%
+            s_chance = 0.1f; // 10%
+        }
+        else // 外环
+        {
+            n_chance = 0.8f; // 80%
+            r_chance = 0.2f; // 20%
+            s_chance = 0.0f; // 0%
+        }
+
+        float randomValue = Random.value; // 生成一个0到1的随机数
+
+        if (randomValue < n_chance)
+        {
+            return commonUnits[Random.Range(0, commonUnits.Count)];
+        }
+        else if (randomValue < n_chance + r_chance)
+        {
+            return rareUnits[Random.Range(0, rareUnits.Count)];
+        }
+        else
+        {
+            // 确保S级单位池不为空
+            if (superRareUnits.Count > 0)
+                return superRareUnits[Random.Range(0, superRareUnits.Count)];
+            else // 如果没有S级单位，则降级为R级
+                return rareUnits[Random.Range(0, rareUnits.Count)];
+        }
+    }
+
+    // 新增一个辅助方法，用于获取随机且安全的生成点
+    private Vector3 GetRandomSpawnPosition()
+    {
+        Vector3 position;
+        int attempts = 0;
+        do
+        {
+            float x = Random.Range(-mapSize, mapSize);
+            float z = Random.Range(-mapSize, mapSize);
+            position = new Vector3(x, 0, z);
+            attempts++;
+            if (attempts > 50)
+            {
+                Debug.LogWarning("无法找到安全的生成点，可能地图太拥挤。");
+                break;
+            }
+        }
+        // 循环直到找到一个不在中心安全区的点
+        while (Vector3.Distance(position, Vector3.zero) < centerSafeRadius);
+
+        return position;
+    }
+
+    // 这是之前创建的生成逻辑，现在被参数化了
+    private void SpawnEnemySnake(Vector3 position, List<GameObject> nodePrefabs, int level)
+    {
+        GameObject enemyRoot = Instantiate(enemyControllerPrefab, position, Quaternion.identity);
+        enemyRoot.transform.SetParent(this.transform); // 将敌人作为GameManager的子对象，方便管理
+
         EnemyController enemyController = enemyRoot.GetComponent<EnemyController>();
-        if (enemyController == null)
-        {
-            Debug.LogError("EnemyControllerPrefab上没有挂载EnemyController脚本！");
-            return;
-        }
         enemyController.Initialize(headLogicPrefab);
 
-        // 依次添加所有身体节点
-        foreach (var sheepName in config.nodePrefabNames)
+        foreach (var prefab in nodePrefabs)
         {
-            enemyController.battleHead.AddSheep(sheepName);
+            // AddSheep接收的是Resources里的名字，我们需要从Prefab获取
+            enemyController.battleHead.AddSheep(prefab.name);
         }
 
-        for (int i = 0; i < config.initialLevel; i++)
+        for (int i = 0; i < level; i++)
         {
             enemyController.battleHead.LevelUp();
         }
 
-
-        Debug.Log($"成功生成一条总等级为 {config.initialLevel} 的敌人蛇。");
+        // 将新生成的敌人添加到活动列表中
+        activeEnemies.Add(new ActiveEnemy(enemyRoot, enemyController.battleHead));
     }
-
 }

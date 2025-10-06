@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+
+
 public class BattleHead : MonoBehaviour
 {
     public bool isPlayer;
@@ -8,11 +10,9 @@ public class BattleHead : MonoBehaviour
 
     // 等级管理
     private List<int> slotLevels = new List<int>();
-    private int totalLevelUps = 0; // 记录总升级次数
-    private List<int> levelUpSequence = new List<int>(); // 缓存升级顺序
-    private int sequenceNextIndex = 0; // 指向下一个要升级的位置
-
-
+    private int totalLevelUps = 0;
+    private List<int> levelUpSequence = new List<int>();
+    private int sequenceNextIndex = 0;
 
     void Awake()
     {
@@ -25,6 +25,17 @@ public class BattleHead : MonoBehaviour
         GenerateLevelUpSequence(100); // 预生成升级序列
     }
 
+    // 用于测试的Update，可以在最终版本中移除
+    void Update()
+    {
+        if (isPlayer && Input.GetKeyDown(KeyCode.T))
+        {
+            // 随机添加一个单位用于测试
+            string[] testUnits = { "ATKF", "HPB", "DEF" };
+            AddSheep(testUnits[Random.Range(0, testUnits.Length)]);
+        }
+    }
+
     public void LevelUp()
     {
         if (sequenceNextIndex >= levelUpSequence.Count)
@@ -33,21 +44,17 @@ public class BattleHead : MonoBehaviour
             return;
         }
 
-        // 获取下一个要升级的槽位索引 (序列中的值是1-based, 列表是0-based)
         int slotToUpgrade = levelUpSequence[sequenceNextIndex] - 1;
 
-        // 确保等级列表足够长
         while (slotLevels.Count <= slotToUpgrade)
         {
             slotLevels.Add(1);
         }
 
-        // 对应槽位等级+1
         slotLevels[slotToUpgrade]++;
         totalLevelUps++;
         sequenceNextIndex++;
 
-        // 升级后必须重新计算所有节点的属性
         UpdateNodes();
         Debug.Log($"槽位 {slotToUpgrade + 1} 升级! 新等级: {slotLevels[slotToUpgrade]}");
     }
@@ -58,15 +65,13 @@ public class BattleHead : MonoBehaviour
         {
             return slotLevels[slotIndex];
         }
-        return 1; // 安全返回，默认1级
+        return 1;
     }
-
 
     public void UpdateNodes()
     {
         for (int i = 0; i < nodeList.Count; i++)
         {
-            // 将该节点所在槽位的等级传递过去
             nodeList[i].CaculateAttribute(this, i, GetLevelForSlot(i));
         }
     }
@@ -86,36 +91,29 @@ public class BattleHead : MonoBehaviour
         }
     }
 
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.T))
-        { 
-            AddSheep("ATK");
-        }
-    }
-
     public void AddSheep(string sheepName)
     {
         var sheepPrefab = Resources.Load<GameObject>(sheepName);
 
         if (sheepPrefab == null)
         {
-            Debug.LogError("无法在找到Prefab: " + sheepName);
+            Debug.LogError("无法在Resources文件夹中找到Prefab: " + sheepName);
             return;
         }
 
         var newNodeObject = Instantiate(sheepPrefab);
         var battleNode = newNodeObject.GetComponent<BattleNode>();
         var snakeNode = newNodeObject.GetComponent<SnakeNode>();
-        //battleNode.sheepName = sheepName; 
 
         if (battleNode == null || snakeNode == null)
         {
-            Destroy(newNodeObject); // 销毁有问题的对象
+            Debug.LogError("实例化的Prefab: " + sheepName + " 上缺少 BattleNode 或 SnakeNode 组件!");
+            Destroy(newNodeObject);
             return;
         }
+
         battleNode.sheepPrefab = sheepPrefab;
+        battleNode.sheepName = sheepName; // 确保sheepName也被记录
         AddNode(battleNode, snakeNode);
     }
 
@@ -123,93 +121,102 @@ public class BattleHead : MonoBehaviour
     {
         newBattleNode.SetHead(this);
         nodeList.Add(newBattleNode);
-        newBattleNode.onAdd?.Invoke(this, nodeList.Count - 1);
 
         snakeHead.AddNodeToList(newSnakeNode);
 
         UpdateNodes();
+
+        // onAdd 可以在所有节点更新后触发，确保它能获取到正确的初始属性
+        newBattleNode.onAdd?.Invoke(this, nodeList.Count - 1);
     }
 
     public void RemoveNode(BattleNode nodeToRemove)
     {
-        // 从物理层移除
         var snakeNodeToRemove = nodeToRemove.GetComponent<SnakeNode>();
         if (snakeNodeToRemove != null)
         {
             snakeHead.RemoveNodeFromList(snakeNodeToRemove);
         }
 
-        // 从逻辑层移除
         nodeList.Remove(nodeToRemove);
         nodeToRemove.onRemove?.Invoke(this);
 
-        // 销毁GameObject
         Destroy(nodeToRemove.gameObject);
 
         UpdateNodes();
     }
 
-    //清除指定索引以及之后的所有节点
     public void ClearNodes(int index)
     {
         if (index < 0 || index >= nodeList.Count) return;
 
-        // 从后往前移除，这样更安全
+        // 从后往前移除，以避免列表索引变化导致的问题
         for (int i = nodeList.Count - 1; i >= index; i--)
         {
-            RemoveNode(nodeList[i]);
+            // 准备移除的节点
+            BattleNode nodeToClear = nodeList[i];
+
+            // 物理层移除
+            var snakeNodeToClear = nodeToClear.GetComponent<SnakeNode>();
+            if (snakeNodeToClear != null)
+            {
+                snakeHead.RemoveNodeFromList(snakeNodeToClear);
+            }
+
+            // 逻辑层移除
+            nodeList.RemoveAt(i);
+            nodeToClear.onRemove?.Invoke(this);
+
+            // 销毁GameObject
+            Destroy(nodeToClear.gameObject);
         }
+
+        UpdateNodes();
     }
 
     public List<BattleNode> GetList()
     {
         return nodeList;
     }
+
     public void SetList(List<BattleNode> newList)
     {
         nodeList = newList;
     }
 
-
     public void SwapNodeForward(BattleNode node)
     {
         int currentIndex = nodeList.IndexOf(node);
-        // 如果已经是蛇头，或者找不到该节点，则不操作
         if (currentIndex <= 0) return;
-
         SwapNodes(currentIndex, currentIndex - 1);
     }
-
 
     public void SwapNodeBackward(BattleNode node)
     {
         int currentIndex = nodeList.IndexOf(node);
-        // 如果已经是蛇尾，或者找不到该节点，则不操作
         if (currentIndex < 0 || currentIndex >= nodeList.Count - 1) return;
-
         SwapNodes(currentIndex, currentIndex + 1);
     }
 
     private void SwapNodes(int index1, int index2)
     {
-        // --- 数据交换 ---
+        // --- 1. 数据层交换 ---
         BattleNode temp = nodeList[index1];
         nodeList[index1] = nodeList[index2];
         nodeList[index2] = temp;
 
-        // --- 表现交换 ---
+        // --- 2. 表现层交换 (委托给SnakeHead) ---
         snakeHead.SwapNodeTransforms(index1, index2);
 
-        // --- 全局更新 ---
+        // --- 3. 全局属性更新 ---
         UpdateNodes();
 
-        // --- 检查并更新相机跟随目标 ---
+        // --- 4. 相机目标更新 ---
         if (index1 == 0 || index2 == 0)
         {
             if (nodeList.Count > 0)
             {
                 SnakeNode newHeadNode = snakeHead.GetAllNodes()[0];
-
                 if (isPlayer)
                 {
                     PlayerInputManager.Instance.UpdateOriginalFollowTarget(newHeadNode.transform);

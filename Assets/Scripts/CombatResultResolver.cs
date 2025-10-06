@@ -13,7 +13,7 @@ public class CombatResultResolver : MonoBehaviour
 
     [Header("战斗冷却设置")]
     [Tooltip("战斗结束后，碰撞失效的持续时间（秒）")]
-    public float combatCooldownDuration = 3.0f;
+    public float combatCooldownDuration = 1.5f;
 
     public bool IsCombatCooldownActive { get; private set; } = false;
 
@@ -71,30 +71,49 @@ public class CombatResultResolver : MonoBehaviour
             switch (result)
             {
                 case CombatResultType.PlayerWon:
+                    Debug.Log("玩家胜利！");
+
                     // 1. 玩家升级
                     playerBattleHead.LevelUp();
 
                     // 2. 吞并逻辑
-                    if (wasRescue) // 如果是击败了救援的蛇头
+                    if (wasRescue) // 击败了救援的蛇头
                     {
+                        Debug.Log("击败了敌方蛇头，吞并整条蛇！");
                         // 吞并整条蛇
                         foreach (var node in enemyBattleHeadInCombat.GetList())
                         {
                             playerBattleHead.AddSheep(node.buffName);
                         }
+                        // 整条吞并，完全消失
+                        Destroy(enemyBattleHeadInCombat.transform.parent.gameObject);
                     }
                     else // 击败的是身体节点
                     {
                         int defeatedIndex = defeatedNodeData.Location;
+                        Debug.Log($"击败了敌方位于 {defeatedIndex} 的节点，开始吞并后半部分。");
+
                         // 从被击败的节点开始，吞并到蛇尾
-                        for (int i = defeatedIndex; i < enemyBattleHeadInCombat.GetList().Count; i++)
+                        var enemyList = enemyBattleHeadInCombat.GetList();
+                        // 为了安全，我们复制一份名字列表再操作
+                        var namesToSteal = new System.Collections.Generic.List<string>();
+                        for (int i = defeatedIndex; i < enemyList.Count; i++)
                         {
-                            playerBattleHead.AddSheep(enemyBattleHeadInCombat.GetList()[i].buffName);
+                            namesToSteal.Add(enemyList[i].buffName);
+                        }
+                        foreach (var sheepName in namesToSteal)
+                        {
+                            playerBattleHead.AddSheep(sheepName);
+                        }
+
+                        enemyBattleHeadInCombat.ClearNodes(defeatedIndex);
+
+                        // 如果斩断后敌人蛇已经空了（比如打的就是蛇头），那就销毁它
+                        if (enemyBattleHeadInCombat.GetList().Count == 0)
+                        {
+                            Destroy(enemyBattleHeadInCombat.transform.parent.gameObject);
                         }
                     }
-
-                    // 3. 移除整条敌人蛇
-                    Destroy(enemyBattleHeadInCombat.transform.parent.gameObject); // 销毁Enemy父对象
                     break;
 
                 case CombatResultType.EnemyWon:
@@ -118,10 +137,18 @@ public class CombatResultResolver : MonoBehaviour
                     break;
 
                 case CombatResultType.PlayerAnnihilated:
-                    Debug.Log("玩家全军覆没！游戏结束。");
-                    HandleGameOver(); // 调用游戏结束方法
+                    Debug.Log("全军覆没！游戏结束。");
+                    HandleGameOver();
+                    // 同样，敌人也消失
+                    if (enemyBattleHeadInCombat != null)
+                    {
+                        Destroy(enemyBattleHeadInCombat.transform.parent.gameObject);
+                    }
                     break;
             }
+
+
+            CombatManager.Instance.ResetTransitionLock();
 
             // 清理战报，并清空引用
             CombatManager.Instance.ClearCombatResult();

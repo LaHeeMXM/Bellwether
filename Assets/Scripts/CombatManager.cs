@@ -25,7 +25,7 @@ public class CombatManager : MonoBehaviour
     public CombatantData defeatedNodeData; // 被击败的节点的原始数据
 
     public bool isTargetNodePlayer;
-
+    public bool IsTransitioningToCombat { get; private set; } = false;
 
     void Awake()
     {
@@ -47,6 +47,15 @@ public class CombatManager : MonoBehaviour
         CombatantData target,
         bool targetIsPlayer)
     {
+
+        if (IsTransitioningToCombat)
+        {
+            Debug.LogWarning("已经有一个战斗正在启动，本次触发被忽略。");
+            return;
+        }
+
+        IsTransitioningToCombat = true;
+
         this.playerHeadData = playerHead;
         this.enemyHeadData = enemyHead;
         this.targetNodeData = target;
@@ -70,5 +79,10 @@ public class CombatManager : MonoBehaviour
         this.playerHeadData = null;
         this.enemyHeadData = null;
         this.targetNodeData = null;
+    }
+
+    public void ResetTransitionLock()
+    {
+        IsTransitioningToCombat = false;
     }
 }

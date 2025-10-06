@@ -28,10 +28,16 @@ public class SnakeHead : MonoBehaviour
     private float _currentSpeed = 0f;
     private Rigidbody _headRigidbody;
 
+    // 用于存储外部AI指令的变量
+    private float _aiMoveInput = 0f;
+    private float _aiRotateInput = 0f;
+    private bool _aiIsRunning = false;
+
+
     // 使用FixedUpdate处理所有物理相关的逻辑
     void FixedUpdate()
     {
-        if (!isPlayer) return;
+        // 只有在没有任何节点时才完全退出
         if (allNodes.Count == 0)
         {
             _currentSpeed = 0;
@@ -41,7 +47,24 @@ public class SnakeHead : MonoBehaviour
         // 确保我们总是在控制正确的蛇头
         _headRigidbody = allNodeRigidbodies[0];
 
-        (float moveInput, float rotateInput, bool isRunning) = HandleInput();
+        float moveInput, rotateInput;
+        bool isRunning;
+
+        if (isPlayer)
+        {
+            // 如果是玩家，则从键盘获取输入
+            (moveInput, rotateInput, isRunning) = HandleInput();
+        }
+        else
+        {
+            // 如果是AI，则从AI指令变量获取输入
+            moveInput = _aiMoveInput;
+            rotateInput = _aiRotateInput;
+            isRunning = _aiIsRunning;
+        }
+
+        // 无论 moveInput 等变量的来源是玩家还是AI，
+        // 后续的核心更新逻辑都会被无差别地执行。
         UpdateSpeed(moveInput, isRunning);
         UpdateHead(rotateInput);
         UpdateBodyPositions();
@@ -58,6 +81,13 @@ public class SnakeHead : MonoBehaviour
         bool running = Input.GetKey(KeyCode.Space);
 
         return (move, rotate, running);
+    }
+
+    public void SetAIInput(float move, float rotate, bool running)
+    {
+        _aiMoveInput = move;
+        _aiRotateInput = rotate;
+        _aiIsRunning = running;
     }
 
     // 平滑加减速逻辑

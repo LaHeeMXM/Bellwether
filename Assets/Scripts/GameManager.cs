@@ -62,6 +62,13 @@ public class GameManager : MonoBehaviour
     public int maxEnemyCount = 35; // 最大敌人数量
     public float respawnInterval = 30f; // 刷新间隔（秒）
 
+    [Header("伏击机制")]
+    [Range(0f, 1f)]
+    public float ambushChance = 0.5f; // 50%概率在玩家附近刷新
+    public float ambushDistance = 20f; // 在玩家周围20距离的位置
+
+    private BattleHead playerBattleHead; // 玩家引用
+
     // --- 私有状态变量 ---
     private List<ActiveEnemy> activeEnemies = new List<ActiveEnemy>();
     private float respawnTimer = 0f;
@@ -79,14 +86,26 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-
     }
 
     public void Initialize()
     {
+        // 找到并缓存玩家引用
+        PlayerController playerController = FindObjectOfType<PlayerController>();
+        if (playerController != null)
+        {
+            playerBattleHead = playerController.GetComponentInChildren<BattleHead>();
+        }
+        if (playerBattleHead == null)
+        {
+            Debug.LogError("GameManager未能找到玩家BattleHead，伏击机制将失效！");
+        }
+
+        // 执行初始敌人生成，不是伏击
+        Debug.Log("GameManager: Initialize() 被调用，开始生成初始敌人...");
         for (int i = 0; i < initialEnemyCount; i++)
         {
-            SpawnNewEnemy();
+            SpawnNewEnemy(false);
         }
     }
 
@@ -99,7 +118,9 @@ public class GameManager : MonoBehaviour
             if (respawnTimer >= respawnInterval)
             {
                 respawnTimer = 0f;
-                SpawnNewEnemy();
+                // 动态刷新时，有概率触发伏击
+                bool attemptAmbush = Random.value < ambushChance;
+                SpawnNewEnemy(attemptAmbush);
             }
         }
 
@@ -127,10 +148,32 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void SpawnNewEnemy()
+    private void SpawnNewEnemy(bool isAmbush)
     {
         // 1. 决定生成位置和所属区域
-        Vector3 spawnPosition = GetRandomSpawnPosition();
+        Vector3 spawnPosition;
+
+        // --- 决定生成位置 ---
+        if (isAmbush && playerBattleHead != null && playerBattleHead.GetList().Count > 0)
+        {
+            // --- 伏击逻辑 ---
+            Debug.Log("尝试在玩家附近刷新敌人...");
+            Transform playerHeadTransform = playerBattleHead.GetComponent<SnakeHead>().GetAllNodes()[0].transform;
+            Vector2 randomDirection = Random.insideUnitCircle.normalized;
+            Vector3 offset = new Vector3(randomDirection.x, 0, randomDirection.y) * ambushDistance;
+            spawnPosition = playerHeadTransform.position + offset;
+
+            // 确保不出界
+            spawnPosition.x = Mathf.Clamp(spawnPosition.x, -mapSize, mapSize);
+            spawnPosition.z = Mathf.Clamp(spawnPosition.z, -mapSize, mapSize);
+        }
+        else
+        {
+            // --- 常规随机逻辑 ---
+            spawnPosition = GetRandomSpawnPosition();
+        }
+
+
         float distanceFromCenter = Vector3.Distance(spawnPosition, Vector3.zero);
 
         // 2. 根据区域决定蛇的长度和等级范围
@@ -164,7 +207,8 @@ public class GameManager : MonoBehaviour
         }
 
         // 5. 生成蛇
-        SpawnEnemySnake(spawnPosition, bodyPrefabs, snakeLevel);
+        Quaternion initialRotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
+        SpawnEnemySnake(spawnPosition, initialRotation, bodyPrefabs, snakeLevel);
     }
 
     // 用于根据区域随机抽取单位
@@ -237,13 +281,13 @@ public class GameManager : MonoBehaviour
     }
 
     // 这是之前创建的生成逻辑，现在被参数化了
-    private void SpawnEnemySnake(Vector3 position, List<GameObject> nodePrefabs, int level)
+    private void SpawnEnemySnake(Vector3 position, Quaternion rotation, List<GameObject> nodePrefabs, int level)
     {
-        GameObject enemyRoot = Instantiate(enemyControllerPrefab, position, Quaternion.identity);
+        GameObject enemyRoot = Instantiate(enemyControllerPrefab, position, rotation);
         enemyRoot.transform.SetParent(this.transform); // 将敌人作为GameManager的子对象，方便管理
 
         EnemyController enemyController = enemyRoot.GetComponent<EnemyController>();
-        enemyController.Initialize(headLogicPrefab);
+        enemyController.Initialize(headLogicPrefab, rotation);
 
         foreach (var prefab in nodePrefabs)
         {

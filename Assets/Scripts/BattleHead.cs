@@ -108,6 +108,7 @@ public class BattleHead : MonoBehaviour
         var newNodeObject = Instantiate(sheepPrefab);
         var battleNode = newNodeObject.GetComponent<BattleNode>();
         var snakeNode = newNodeObject.GetComponent<SnakeNode>();
+        //battleNode.sheepName = sheepName; 
 
         if (battleNode == null || snakeNode == null)
         {

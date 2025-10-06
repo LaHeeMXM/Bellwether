@@ -11,6 +11,8 @@ public class SheepCollisionHandle : MonoBehaviour
         
         var oppositeNode = info.collider.GetComponent<BattleNode>();
         var selfNode = GetComponent<BattleNode>();
+
+
         if(oppositeNode == null || selfNode == null) return;
         //只有head这边触发
         if (!selfNode.IsHead()) return;
@@ -30,7 +32,11 @@ public class SheepCollisionHandle : MonoBehaviour
             playerHeadData = oppositeNode.GetHead().GetList()[0].GetCombatantData();
             enemyHeadData = selfNode.GetCombatantData();
         }
-       
+
+        BattleHead playerHead = selfNode.IsPlayer() ? selfNode.GetHead() : oppositeNode.GetHead();
+        BattleHead enemyHead = selfNode.IsPlayer() ? oppositeNode.GetHead() : selfNode.GetHead();
+        CombatResultResolver.Instance.RegisterCombatants(playerHead, enemyHead);
+
 
         Debug.Log("Into Combat!");
         CombatManager.Instance.StartCombat(playerHeadData,enemyHeadData,targetNodeData,oppositeNode.IsPlayer());

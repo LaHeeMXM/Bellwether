@@ -28,6 +28,7 @@ public class TurnBasedManager : MonoBehaviour
     private bool isRescuePossible = false; // 本场战斗是否可能触发救援
     private int rescueDistance;            // 救援蛇头剩余的“路程”
     private float turnCounter = 0.5f;           // 用于计算救援速度的回合计数器
+    private bool wasRescueTriggered = false;
 
     [Header("救援动画设置")]
     public float swapAnimationDuration = 1.5f;
@@ -98,11 +99,14 @@ public class TurnBasedManager : MonoBehaviour
 
     IEnumerator BattleFlow()
     {
+
         Debug.Log("回合开始");
         yield return new WaitForSeconds(1f);
 
         // 主动攻击则先手
         currentState = isPlayerFirst? BattleState.PLAYERTURN : BattleState.ENEMYTURN;
+
+        wasRescueTriggered = false;
 
         while (currentState != BattleState.WON && currentState != BattleState.LOST)
         {
@@ -145,7 +149,7 @@ public class TurnBasedManager : MonoBehaviour
             }
         }
 
-        EndBattle();
+        StartCoroutine(EndBattleCoroutine());
     }
 
     IEnumerator AttackRoutine(BattleUnit attacker, BattleUnit defender, GameObject attackerModel, GameObject defenderModel)
@@ -224,6 +228,7 @@ public class TurnBasedManager : MonoBehaviour
     {
         UIBattleManager.Instance.ShowArrivalMessage();
         currentState = BattleState.PAUSED; // 暂停战斗流程以进行刷新
+        wasRescueTriggered = true;
 
         yield return new WaitForSeconds(1f); // 留出停顿
 
@@ -326,15 +331,46 @@ public class TurnBasedManager : MonoBehaviour
 
 
 
-    void EndBattle()
+    IEnumerator EndBattleCoroutine()
     {
-        if (currentState == BattleState.WON) 
-            Debug.Log("胜利");
-        else if (currentState == BattleState.LOST) 
-            Debug.Log("失败");
+        CombatResultType result;
+        CombatantData defeatedNode = null;
+        bool playerLostAllNodes = false;
 
-        UIBattleManager.Instance.RestoreOriginalTimeScale();
-        // 返回主场景
+        if (currentState == BattleState.WON)
+        {
+            Debug.Log("胜利");
+            result = CombatResultType.PlayerWon;
+            // 被击败的是敌人，我们需要它的原始数据
+            // 如果敌人被救援，那么被击败的是敌人蛇头；否则是被攻击的节点
+            defeatedNode = wasRescueTriggered ? CombatManager.Instance.enemyHeadData : CombatManager.Instance.targetNodeData;
+        }
+        else // LOST
+        {
+            Debug.Log("失败");
+            result = CombatResultType.EnemyWon;
+            defeatedNode = wasRescueTriggered ? CombatManager.Instance.playerHeadData : CombatManager.Instance.targetNodeData;
+
+            // 检查玩家是否全军覆没 (只有在玩家蛇头参战并失败时)
+            bool isPlayerNodeTarget = CombatManager.Instance.isTargetNodePlayer;
+            if ((!isPlayerNodeTarget && wasRescueTriggered) || (isPlayerNodeTarget && !wasRescueTriggered && defeatedNode.Location == 0))
+            {
+                // 复杂判断：1.敌人偷袭玩家，救援抵达后玩家蛇头战败。 2.玩家偷袭敌人身体，但被反杀，而那个身体刚好是蛇头
+                // 更简单的判断：被击败的节点是玩家蛇头
+                if (defeatedNode == CombatManager.Instance.playerHeadData)
+                {
+                    playerLostAllNodes = true;
+                    result = CombatResultType.PlayerAnnihilated;
+                }
+            }
+        }
+
+        Debug.Log("战斗结束，等待3秒后返回主场景...");
+        yield return new WaitForSeconds(3.0f);
+
+        // 调用信使，带着战报返回
+        UIBattleManager.Instance.RestoreOriginalTimeScale(); // 确保时间恢复正常
+        CombatManager.Instance.EndCombat(result, wasRescueTriggered, defeatedNode);
     }
 
 

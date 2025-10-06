@@ -119,6 +119,7 @@ public class BattleNode : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     public CombatantData GetCombatantData()
     {
         CombatantData data = new CombatantData();
+        data.unitName = sheepName;
         data.Attack = finalAttribute.Attack;
         data.Defense = finalAttribute.Defense;
         data.Health = finalAttribute.Health;

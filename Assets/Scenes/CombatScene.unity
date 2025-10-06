@@ -2837,7 +2837,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Name
+  m_text: AAAAAAAAAAAAAAA
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 6de6c224c6ddcd14095a0c8e97c57ffb, type: 2}
   m_sharedMaterial: {fileID: 4430058194484110732, guid: 6de6c224c6ddcd14095a0c8e97c57ffb, type: 2}
@@ -2864,12 +2864,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
+  m_fontSize: 21.65
   m_fontSizeBase: 36
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 20
+  m_fontSizeMax: 40
   m_fontStyle: 0
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 4096
@@ -3523,12 +3523,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
+  m_fontSize: 40
   m_fontSizeBase: 36
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 20
+  m_fontSizeMax: 40
   m_fontStyle: 0
   m_HorizontalAlignment: 4
   m_VerticalAlignment: 4096
@@ -3703,6 +3703,18 @@ MonoBehaviour:
     Defense: 0
     Level: 0
     Location: 2
+    Assistance: 0
+  hasCombatResult: 0
+  combatResult: 0
+  wasRescueActive: 0
+  defeatedNodeData:
+    unitName: 
+    unitPrefab: {fileID: 0}
+    Health: 0
+    Attack: 0
+    Defense: 0
+    Level: 0
+    Location: 0
     Assistance: 0
   isTargetNodePlayer: 1
 --- !u!1 &1004396018587780562

@@ -210,7 +210,6 @@ public class BattleHead : MonoBehaviour
             {
                 SnakeNode newHeadNode = snakeHead.GetAllNodes()[0];
 
-                // 区分玩家和敌人
                 if (isPlayer)
                 {
                     PlayerInputManager.Instance.UpdateOriginalFollowTarget(newHeadNode.transform);

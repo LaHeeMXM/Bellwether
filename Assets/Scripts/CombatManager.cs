@@ -52,7 +52,6 @@ public class CombatManager : MonoBehaviour
         this.targetNodeData = target;
         this.isTargetNodePlayer = targetIsPlayer;
 
-        SceneManager.LoadScene("CombatScene");
     }
 
     public void EndCombat(CombatResultType result, bool rescueActive, CombatantData defeatedNode)
@@ -62,8 +61,6 @@ public class CombatManager : MonoBehaviour
         this.wasRescueActive = rescueActive;
         this.defeatedNodeData = defeatedNode;
 
-        // 返回主世界
-        SceneManager.LoadScene("MainScene"); 
     }
 
     public void ClearCombatResult()

@@ -26,10 +26,19 @@ public class SnakeHead : MonoBehaviour
     private readonly List<Rigidbody> allNodeRigidbodies = new List<Rigidbody>();
     private float _currentSpeed = 0f; // 当前蛇头的实际速度
 
+    private Rigidbody _headRigidbody;
+
     void FixedUpdate()
     {
         if (!isPlayer) return;
-        if (allNodes.Count == 0) return;
+        if (allNodes.Count == 0)
+        {
+            // 如果没有节点了，确保速度归零
+            _currentSpeed = 0;
+            return;
+        }
+
+        _headRigidbody = allNodeRigidbodies[0];
 
         (float moveInput, float rotateInput, bool isRunning) = HandleInput();
         UpdateSpeed(moveInput, isRunning);
@@ -80,18 +89,16 @@ public class SnakeHead : MonoBehaviour
 
     void UpdateHead(float rotateInput)
     {
-        Rigidbody headRigidbody = allNodeRigidbodies[0];
-
         // 旋转
-        if (_currentSpeed > 0.1f && rotateInput != 0) // 只有在移动时才能转向
+        if (_currentSpeed > 0.1f && rotateInput != 0)
         {
             Quaternion deltaRotation = Quaternion.Euler(Vector3.up * rotateInput * headRotationSpeed * Time.fixedDeltaTime);
-            headRigidbody.MoveRotation(headRigidbody.rotation * deltaRotation);
+            _headRigidbody.MoveRotation(_headRigidbody.rotation * deltaRotation);
         }
 
-        // 前进 (使用_currentSpeed)
-        Vector3 targetPosition = headRigidbody.position + headRigidbody.transform.forward * _currentSpeed * Time.fixedDeltaTime;
-        headRigidbody.MovePosition(targetPosition);
+        // 前进
+        Vector3 targetPosition = _headRigidbody.position + _headRigidbody.transform.forward * _currentSpeed * Time.fixedDeltaTime;
+        _headRigidbody.MovePosition(targetPosition);
     }
 
     void BroadcastSpeedToAllNodes()
@@ -212,22 +219,21 @@ public class SnakeHead : MonoBehaviour
             return;
         }
 
-        // 交换allNodes列表中的占位符节点
+        // 交换物理节点列表
         SnakeNode tempNode = allNodes[index1];
         allNodes[index1] = allNodes[index2];
         allNodes[index2] = tempNode;
 
-        Transform t1 = allNodes[index1].transform;
-        Transform t2 = allNodes[index2].transform;
+        // 交换Rigidbody缓存列表
+        Rigidbody tempRb = allNodeRigidbodies[index1];
+        allNodeRigidbodies[index1] = allNodeRigidbodies[index2];
+        allNodeRigidbodies[index2] = tempRb;
 
-        Vector3 tempPos = t1.position;
-        Quaternion tempRot = t1.rotation;
+        // --- 不再有任何操作Transform的代码 ---
+        // 这将允许UpdateBodyPositions()来平滑处理位置变化
 
-        t1.position = t2.position;
-        t1.rotation = t2.rotation;
-
-        t2.position = tempPos;
-        t2.rotation = tempRot;
+        Debug.Log($"物理节点列表已交换 {index1} 和 {index2}。");
     }
+
 
 }

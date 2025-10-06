@@ -371,6 +371,7 @@ public class TurnBasedManager : MonoBehaviour
         // 调用信使，带着战报返回
         UIBattleManager.Instance.RestoreOriginalTimeScale(); // 确保时间恢复正常
         CombatManager.Instance.EndCombat(result, wasRescueTriggered, defeatedNode);
+        GameFlowManager.Instance.ReturnFromCombat();
     }
 
 

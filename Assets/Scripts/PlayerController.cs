@@ -6,10 +6,24 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    private static bool _isInstantiated = false;
+
     GameObject headInstance;
     SnakeHead snakeHead;
     BattleHead battleHead;
     public static CinemachineVirtualCamera cineCamera;
+
+    void Awake()
+    {
+        if (_isInstantiated)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        _isInstantiated = true;
+    }
+
 
     void Start()
     {

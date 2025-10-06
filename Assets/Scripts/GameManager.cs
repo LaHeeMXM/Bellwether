@@ -28,9 +28,20 @@ public class GameManager : MonoBehaviour
     [Tooltip("配置你想要在场景中生成的所有敌人蛇")]
     public List<EnemySnakeConfig> enemySnakesToSpawn;
 
+    private bool _isInitialized = false;
+
     void Start()
     {
+
+    }
+
+    public void Initialize()
+    {
+        if (_isInitialized) return; 
+
+        Debug.Log("GameManager 开始生成敌人...");
         SpawnAllEnemies();
+        _isInitialized = true;
     }
 
     private void SpawnAllEnemies()

@@ -8,7 +8,11 @@ public class SheepCollisionHandle : MonoBehaviour
 
     void OnCollisionEnter(Collision info)
     {
-        
+        if (CombatResultResolver.Instance != null && CombatResultResolver.Instance.IsCombatCooldownActive)
+        {
+            return;
+        }
+
         var oppositeNode = info.collider.GetComponent<BattleNode>();
         var selfNode = GetComponent<BattleNode>();
 
@@ -40,21 +44,7 @@ public class SheepCollisionHandle : MonoBehaviour
 
         Debug.Log("Into Combat!");
         CombatManager.Instance.StartCombat(playerHeadData,enemyHeadData,targetNodeData,oppositeNode.IsPlayer());
-    }
-    void Awake()
-    {
-        _battleHead = GetComponent<BattleNode>().GetHead();
 
-    }
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        GameFlowManager.Instance.GoToCombat();
     }
 }

@@ -11,6 +11,12 @@ public class CombatResultResolver : MonoBehaviour
     private BattleHead enemyBattleHeadInCombat;
 
 
+    [Header("战斗冷却设置")]
+    [Tooltip("战斗结束后，碰撞失效的持续时间（秒）")]
+    public float combatCooldownDuration = 3.0f;
+
+    public bool IsCombatCooldownActive { get; private set; } = false;
+
     void Awake()
     {
         if (Instance == null) Instance = this;
@@ -44,11 +50,11 @@ public class CombatResultResolver : MonoBehaviour
         this.enemyBattleHeadInCombat = enemy;
     }
 
-    private void CheckAndResolveCombat()
+    public void CheckAndResolveCombat()
     {
         if (CombatManager.Instance != null && CombatManager.Instance.hasCombatResult)
         {
-            Debug.Log("检测到战斗结果，开始处理...");
+            StartCombatCooldown();
 
             // 如果没有正确的引用，则无法处理
             if (playerBattleHead == null || enemyBattleHeadInCombat == null)
@@ -74,7 +80,7 @@ public class CombatResultResolver : MonoBehaviour
                         // 吞并整条蛇
                         foreach (var node in enemyBattleHeadInCombat.GetList())
                         {
-                            playerBattleHead.AddSheep(node.sheepName);
+                            playerBattleHead.AddSheep(node.buffName);
                         }
                     }
                     else // 击败的是身体节点
@@ -83,7 +89,7 @@ public class CombatResultResolver : MonoBehaviour
                         // 从被击败的节点开始，吞并到蛇尾
                         for (int i = defeatedIndex; i < enemyBattleHeadInCombat.GetList().Count; i++)
                         {
-                            playerBattleHead.AddSheep(enemyBattleHeadInCombat.GetList()[i].sheepName);
+                            playerBattleHead.AddSheep(enemyBattleHeadInCombat.GetList()[i].buffName);
                         }
                     }
 
@@ -124,11 +130,34 @@ public class CombatResultResolver : MonoBehaviour
         }
     }
 
-    private void HandleGameOver()
+    private void StartCombatCooldown()
+    {
+        // 停止任何可能正在运行的旧的冷却计时器
+        StopAllCoroutines();
+        // 启动新的冷却计时器协程
+        StartCoroutine(CombatCooldownCoroutine());
+    }
+
+    private IEnumerator CombatCooldownCoroutine()
+    {
+        IsCombatCooldownActive = true;
+        Debug.Log($"战斗冷却开始，持续 {combatCooldownDuration} 秒。");
+
+      
+        yield return new WaitForSeconds(combatCooldownDuration);
+
+        IsCombatCooldownActive = false;
+        Debug.Log("战斗冷却结束，可以再次触发战斗。");
+    }
+
+
+
+    public void HandleGameOver()
     {
         // 在这里实现你的游戏结束逻辑
         // 比如：显示结束UI，暂停游戏，提供重新开始的按钮等
         Debug.Log("--- GAME OVER ---");
         Time.timeScale = 0; // 简单地暂停游戏
     }
+
 }

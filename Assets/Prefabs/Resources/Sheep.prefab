@@ -2947,6 +2947,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sheepPrefab: {fileID: 0}
+  sheepName: 
   buffName: ATK
   buffParam:
     a: 1

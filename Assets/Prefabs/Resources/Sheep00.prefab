@@ -3669,7 +3669,7 @@ GameObject:
   - component: {fileID: 3847088543891683395}
   - component: {fileID: 772748331713968855}
   m_Layer: 0
-  m_Name: Sheep02
+  m_Name: Sheep00
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3752,7 +3752,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sheepPrefab: {fileID: 0}
-  buffName: DEF
+  buffName: HP
   buffParam:
     a: 2
     b: 1

@@ -3752,7 +3752,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sheepPrefab: {fileID: 0}
-  buffName: ATKF
+  buffName: ATK
   buffParam:
     a: 2
     b: 1
@@ -3791,18 +3791,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80ac75433cd0d974d879ef2f1358d2ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  idleSpeed: 0.05
-  walkSpeed: 2
-  runSpeed: 5
-  turnAngleThreshold: 45
-  walkForwardAnimation: walk_forward
-  walkBackwardAnimation: walk_backwards
-  runForwardAnimation: run_forward
-  turn90LAnimation: turn_90_L
-  turn90RAnimation: turn_90_R
-  trotAnimation: trot_forward
-  sittostandAnimation: sit_to_stand
-  standtositAnimation: stand_to_sit
+  speedParameterName: Speed
   attackAnimation: attack
   hitReactionAnimation: hit_reaction
   deathAnimation: death
@@ -4611,7 +4600,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3660182278034667714, guid: fec47fabe41c0164a902b443010f69c2, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3660182278034667714, guid: fec47fabe41c0164a902b443010f69c2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

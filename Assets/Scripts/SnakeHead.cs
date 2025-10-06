@@ -24,7 +24,7 @@ public class SnakeHead : MonoBehaviour
 
     private readonly List<SnakeNode> allNodes = new List<SnakeNode>();
     private readonly List<Rigidbody> allNodeRigidbodies = new List<Rigidbody>();
-    private float _currentSpeed = 0f; // ✨ 核心：当前蛇头的实际速度
+    private float _currentSpeed = 0f; // 当前蛇头的实际速度
 
     void FixedUpdate()
     {
@@ -32,13 +32,9 @@ public class SnakeHead : MonoBehaviour
         if (allNodes.Count == 0) return;
 
         (float moveInput, float rotateInput, bool isRunning) = HandleInput();
-
         UpdateSpeed(moveInput, isRunning);
-
         UpdateHead(rotateInput);
-
         UpdateBodyPositions();
-
         BroadcastSpeedToAllNodes();
     }
 

@@ -95,6 +95,8 @@ public class BattleNode : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     // 当鼠标指针按下
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (!IsPlayer()) return;
+
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             Debug.Log("点击了节点: " + gameObject.name + " at index " + _index);
@@ -106,6 +108,8 @@ public class BattleNode : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     // 当鼠标指针抬起
     public void OnPointerUp(PointerEventData eventData)
     {
+        if (!IsPlayer()) return;
+
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             // 通知输入管理器，我们结束了换位操作

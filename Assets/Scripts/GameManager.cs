@@ -220,14 +220,14 @@ public class GameManager : MonoBehaviour
 
         if (distance <= innerRingRadius) // 内环
         {
-            n_chance = 0.2f; // 20%
-            r_chance = 0.5f; // 50%
-            s_chance = 0.3f; // 30%
+            n_chance = 0.5f; // 20%
+            r_chance = 0.3f; // 50%
+            s_chance = 0.2f; // 30%
         }
         else if (distance <= middleRingRadius) // 中环
         {
-            n_chance = 0.5f; // 50%
-            r_chance = 0.4f; // 40%
+            n_chance = 0.6f; // 50%
+            r_chance = 0.3f; // 40%
             s_chance = 0.1f; // 10%
         }
         else // 外环

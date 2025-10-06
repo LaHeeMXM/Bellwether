@@ -715,9 +715,9 @@ MonoBehaviour:
   enemySnakesToSpawn:
   - spawnPosition: {x: 10, y: 0, z: 10}
     nodePrefabNames:
-    - Sheep01
-    - Sheep01
-    - Sheep01
+    - HP
+    - ATKF
+    - DEFF
     initialLevel: 1
 --- !u!4 &1986959254
 Transform:

@@ -15,7 +15,7 @@ public class EnemySnakeConfig
     public int initialLevel = 1;
 }
 
-public enum Rarity { N, R, S }  //稀有度
+public enum Rarity { N, R, S ,X }  //稀有度
 
 [System.Serializable]
 
@@ -107,6 +107,8 @@ public class GameManager : MonoBehaviour
         {
             SpawnNewEnemy(false);
         }
+
+        SpawnBoss();
     }
 
     void Update()
@@ -303,4 +305,32 @@ public class GameManager : MonoBehaviour
         // 将新生成的敌人添加到活动列表中
         activeEnemies.Add(new ActiveEnemy(enemyRoot, enemyController.battleHead));
     }
+
+    private void SpawnBoss()
+    {
+        // 1. 从单位池中找到Boss的配置信息
+        UnitSpawnInfo bossInfo = unitSpawnPool.FirstOrDefault(u => u.rarity == Rarity.X);
+
+        // 如果没有在Inspector中配置Boss，则不生成并给出提示
+        if (bossInfo == null || bossInfo.unitPrefab == null)
+        {
+            Debug.LogWarning("单位配置池中未找到稀有度为 'X' 的Boss配置，Boss将不会生成。");
+            return;
+        }
+
+        // 2. 根据您的要求，定义Boss的生成参数
+        Vector3 bossPosition = Vector3.zero; // 固定位置 (0, 0)
+        int bossLevel = 0;                   // 等级为 0
+
+        // Boss只有一个个体，所以它的“身体”列表只包含它自己
+        List<GameObject> bossBody = new List<GameObject> { bossInfo.unitPrefab };
+
+        // 随机一个初始朝向
+        Quaternion initialRotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
+
+        // 3. 调用现有的生成框架来创建Boss
+        Debug.Log("正在 (0,0) 位置生成Boss...");
+        SpawnEnemySnake(bossPosition, initialRotation, bossBody, bossLevel);
+    }
+
 }

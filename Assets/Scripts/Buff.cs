@@ -61,7 +61,9 @@ public static class Buff
         // --- 复合自身 (Compound Self) ---
         {"HPATK", AddHealthAttackSelf},
         {"HPDEF", AddHealthDefenseSelf},
-        {"ATKDEF", AddAttackDefenseSelf}
+        {"ATKDEF", AddAttackDefenseSelf},
+
+        {"BOSS", IMBOSS}
     };
 
 
@@ -247,6 +249,10 @@ public static class Buff
 
     #endregion
 
+    public static UnitAttribute IMBOSS(BuffInfo info)
+    {
+        return new UnitAttribute(0, 0, 0);
+    }
 
 }
 public delegate UnitAttribute BuffFunction(BuffInfo info);

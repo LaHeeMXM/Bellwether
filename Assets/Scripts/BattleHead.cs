@@ -28,12 +28,12 @@ public class BattleHead : MonoBehaviour
     // 用于测试的Update，可以在最终版本中移除
     void Update()
     {
-        if (isPlayer && Input.GetKeyDown(KeyCode.T))
-        {
-            // 随机添加一个单位用于测试
-            string[] testUnits = { "ATKF", "HPB", "DEF" };
-            AddSheep(testUnits[Random.Range(0, testUnits.Length)]);
-        }
+        //if (isPlayer && Input.GetKeyDown(KeyCode.T))
+        //{
+        //    // 随机添加一个单位用于测试
+        //    string[] testUnits = { "ATKF", "HPB", "DEF" };
+        //    AddSheep(testUnits[Random.Range(0, testUnits.Length)]);
+        //}
     }
 
     public void LevelUp()

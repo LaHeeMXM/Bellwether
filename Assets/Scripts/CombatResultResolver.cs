@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -11,9 +11,15 @@ public class CombatResultResolver : MonoBehaviour
     private BattleHead enemyBattleHeadInCombat;
 
 
-    [Header("Õ½¶·ÀäÈ´ÉèÖÃ")]
-    [Tooltip("Õ½¶·½áÊøºó£¬Åö×²Ê§Ğ§µÄ³ÖĞøÊ±¼ä£¨Ãë£©")]
+    [Header("æˆ˜æ–—å†·å´è®¾ç½®")]
+    [Tooltip("æˆ˜æ–—ç»“æŸåï¼Œç¢°æ’å¤±æ•ˆçš„æŒç»­æ—¶é—´ï¼ˆç§’ï¼‰")]
     public float combatCooldownDuration = 1.5f;
+
+    [Header("æ¸¸æˆç»“æŸè®¾ç½®")]
+    [Tooltip("Game Overç•Œé¢æ˜¾ç¤ºçš„UI Panel")]
+    public GameObject gameOverPanel;
+    [Tooltip("æ˜¾ç¤ºGame Overç•Œé¢åï¼Œç­‰å¾…å¤šä¹…å†é‡è½½åœºæ™¯ï¼ˆç§’ï¼‰")]
+    public float gameOverReloadDelay = 3.0f;
 
     public bool IsCombatCooldownActive { get; private set; } = false;
 
@@ -25,7 +31,7 @@ public class CombatResultResolver : MonoBehaviour
 
     void Start()
     {
-        // ¼àÌı³¡¾°¼ÓÔØÊÂ¼ş£¬ÒÔ±ãÔÚÃ¿´Î»Øµ½Ö÷³¡¾°Ê±¶¼½øĞĞ¼ì²é
+        // ç›‘å¬åœºæ™¯åŠ è½½äº‹ä»¶ï¼Œä»¥ä¾¿åœ¨æ¯æ¬¡å›åˆ°ä¸»åœºæ™¯æ—¶éƒ½è¿›è¡Œæ£€æŸ¥
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
@@ -36,7 +42,7 @@ public class CombatResultResolver : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Ö»ÔÚ»Øµ½Ö÷³¡¾°Ê±Ö´ĞĞ
+        // åªåœ¨å›åˆ°ä¸»åœºæ™¯æ—¶æ‰§è¡Œ
         if (scene.name == "MainScene")
         {
             CheckAndResolveCombat();
@@ -56,10 +62,10 @@ public class CombatResultResolver : MonoBehaviour
         {
             StartCombatCooldown();
 
-            // Èç¹ûÃ»ÓĞÕıÈ·µÄÒıÓÃ£¬ÔòÎŞ·¨´¦Àí
+            // å¦‚æœæ²¡æœ‰æ­£ç¡®çš„å¼•ç”¨ï¼Œåˆ™æ— æ³•å¤„ç†
             if (playerBattleHead == null || enemyBattleHeadInCombat == null)
             {
-                Debug.LogError("ÎŞ·¨´¦ÀíÕ½¶·½á¹û£¬ÒòÎª²ÎÕ½Ë«·½Î´±»ÕıÈ·×¢²á£¡");
+                Debug.LogError("æ— æ³•å¤„ç†æˆ˜æ–—ç»“æœï¼Œå› ä¸ºå‚æˆ˜åŒæ–¹æœªè¢«æ­£ç¡®æ³¨å†Œï¼");
                 CombatManager.Instance.ClearCombatResult();
                 return;
             }
@@ -71,31 +77,31 @@ public class CombatResultResolver : MonoBehaviour
             switch (result)
             {
                 case CombatResultType.PlayerWon:
-                    Debug.Log("Íæ¼ÒÊ¤Àû£¡");
+                    Debug.Log("ç©å®¶èƒœåˆ©ï¼");
 
-                    // 1. Íæ¼ÒÉı¼¶
+                    // 1. ç©å®¶å‡çº§
                     playerBattleHead.LevelUp();
 
-                    // 2. ÍÌ²¢Âß¼­
-                    if (wasRescue) // »÷°ÜÁË¾ÈÔ®µÄÉßÍ·
+                    // 2. åå¹¶é€»è¾‘
+                    if (wasRescue) // å‡»è´¥äº†æ•‘æ´çš„è›‡å¤´
                     {
-                        Debug.Log("»÷°ÜÁËµĞ·½ÉßÍ·£¬ÍÌ²¢ÕûÌõÉß£¡");
-                        // ÍÌ²¢ÕûÌõÉß
+                        Debug.Log("å‡»è´¥äº†æ•Œæ–¹è›‡å¤´ï¼Œåå¹¶æ•´æ¡è›‡ï¼");
+                        // åå¹¶æ•´æ¡è›‡
                         foreach (var node in enemyBattleHeadInCombat.GetList())
                         {
                             playerBattleHead.AddSheep(node.buffName);
                         }
-                        // ÕûÌõÍÌ²¢£¬ÍêÈ«ÏûÊ§
+                        // æ•´æ¡åå¹¶ï¼Œå®Œå…¨æ¶ˆå¤±
                         Destroy(enemyBattleHeadInCombat.transform.parent.gameObject);
                     }
-                    else // »÷°ÜµÄÊÇÉíÌå½Úµã
+                    else // å‡»è´¥çš„æ˜¯èº«ä½“èŠ‚ç‚¹
                     {
                         int defeatedIndex = defeatedNodeData.Location;
-                        Debug.Log($"»÷°ÜÁËµĞ·½Î»ÓÚ {defeatedIndex} µÄ½Úµã£¬¿ªÊ¼ÍÌ²¢ºó°ë²¿·Ö¡£");
+                        Debug.Log($"å‡»è´¥äº†æ•Œæ–¹ä½äº {defeatedIndex} çš„èŠ‚ç‚¹ï¼Œå¼€å§‹åå¹¶ååŠéƒ¨åˆ†ã€‚");
 
-                        // ´Ó±»»÷°ÜµÄ½Úµã¿ªÊ¼£¬ÍÌ²¢µ½ÉßÎ²
+                        // ä»è¢«å‡»è´¥çš„èŠ‚ç‚¹å¼€å§‹ï¼Œåå¹¶åˆ°è›‡å°¾
                         var enemyList = enemyBattleHeadInCombat.GetList();
-                        // ÎªÁË°²È«£¬ÎÒÃÇ¸´ÖÆÒ»·İÃû×ÖÁĞ±íÔÙ²Ù×÷
+                        // ä¸ºäº†å®‰å…¨ï¼Œæˆ‘ä»¬å¤åˆ¶ä¸€ä»½åå­—åˆ—è¡¨å†æ“ä½œ
                         var namesToSteal = new System.Collections.Generic.List<string>();
                         for (int i = defeatedIndex; i < enemyList.Count; i++)
                         {
@@ -108,7 +114,7 @@ public class CombatResultResolver : MonoBehaviour
 
                         enemyBattleHeadInCombat.ClearNodes(defeatedIndex);
 
-                        // Èç¹ûÕ¶¶ÏºóµĞÈËÉßÒÑ¾­¿ÕÁË£¨±ÈÈç´òµÄ¾ÍÊÇÉßÍ·£©£¬ÄÇ¾ÍÏú»ÙËü
+                        // å¦‚æœæ–©æ–­åæ•Œäººè›‡å·²ç»ç©ºäº†ï¼ˆæ¯”å¦‚æ‰“çš„å°±æ˜¯è›‡å¤´ï¼‰ï¼Œé‚£å°±é”€æ¯å®ƒ
                         if (enemyBattleHeadInCombat.GetList().Count == 0)
                         {
                             Destroy(enemyBattleHeadInCombat.transform.parent.gameObject);
@@ -117,29 +123,29 @@ public class CombatResultResolver : MonoBehaviour
                     break;
 
                 case CombatResultType.EnemyWon:
-                    // 1. µĞÈËÉı¼¶ (ËäÈ»ÂíÉÏ±»Ïú»Ù£¬µ«¿ÉÒÔ±£ÁôÕâ¸öÂß¼­)
+                    // 1. æ•Œäººå‡çº§ (è™½ç„¶é©¬ä¸Šè¢«é”€æ¯ï¼Œä½†å¯ä»¥ä¿ç•™è¿™ä¸ªé€»è¾‘)
                     enemyBattleHeadInCombat.LevelUp();
 
-                    // 2. Íæ¼Ò±»ÍÌ²¢Âß¼­
+                    // 2. ç©å®¶è¢«åå¹¶é€»è¾‘
                     if (wasRescue)
                     {
-                        // ÕûÌõÉß±»ÍÌ²¢ (Êµ¼ÊÉÏÊÇÓÎÏ·½áÊø£¬µ«Âß¼­ÉÏÊÇÕâÑù)
+                        // æ•´æ¡è›‡è¢«åå¹¶ (å®é™…ä¸Šæ˜¯æ¸¸æˆç»“æŸï¼Œä½†é€»è¾‘ä¸Šæ˜¯è¿™æ ·)
                     }
                     else
                     {
                         int defeatedIndex = defeatedNodeData.Location;
-                        // Íæ¼Ò´Ó±»»÷°ÜµÄ½Úµã¿ªÊ¼£¬µ½ÉßÎ²µÄËùÓĞµ¥Î»±»ÒÆ³ı
+                        // ç©å®¶ä»è¢«å‡»è´¥çš„èŠ‚ç‚¹å¼€å§‹ï¼Œåˆ°è›‡å°¾çš„æ‰€æœ‰å•ä½è¢«ç§»é™¤
                         playerBattleHead.ClearNodes(defeatedIndex);
                     }
 
-                    // 3. ÒÆ³ıÕûÌõµĞÈËÉß
+                    // 3. ç§»é™¤æ•´æ¡æ•Œäººè›‡
                     Destroy(enemyBattleHeadInCombat.transform.parent.gameObject);
                     break;
 
                 case CombatResultType.PlayerAnnihilated:
-                    Debug.Log("È«¾ü¸²Ã»£¡ÓÎÏ·½áÊø¡£");
+                    Debug.Log("å…¨å†›è¦†æ²¡ï¼æ¸¸æˆç»“æŸã€‚");
                     HandleGameOver();
-                    // Í¬Ñù£¬µĞÈËÒ²ÏûÊ§
+                    // åŒæ ·ï¼Œæ•Œäººä¹Ÿæ¶ˆå¤±
                     if (enemyBattleHeadInCombat != null)
                     {
                         Destroy(enemyBattleHeadInCombat.transform.parent.gameObject);
@@ -150,7 +156,7 @@ public class CombatResultResolver : MonoBehaviour
 
             CombatManager.Instance.ResetTransitionLock();
 
-            // ÇåÀíÕ½±¨£¬²¢Çå¿ÕÒıÓÃ
+            // æ¸…ç†æˆ˜æŠ¥ï¼Œå¹¶æ¸…ç©ºå¼•ç”¨
             CombatManager.Instance.ClearCombatResult();
             playerBattleHead = null;
             enemyBattleHeadInCombat = null;
@@ -159,32 +165,56 @@ public class CombatResultResolver : MonoBehaviour
 
     private void StartCombatCooldown()
     {
-        // Í£Ö¹ÈÎºÎ¿ÉÄÜÕıÔÚÔËĞĞµÄ¾ÉµÄÀäÈ´¼ÆÊ±Æ÷
+        // åœæ­¢ä»»ä½•å¯èƒ½æ­£åœ¨è¿è¡Œçš„æ—§çš„å†·å´è®¡æ—¶å™¨
         StopAllCoroutines();
-        // Æô¶¯ĞÂµÄÀäÈ´¼ÆÊ±Æ÷Ğ­³Ì
+        // å¯åŠ¨æ–°çš„å†·å´è®¡æ—¶å™¨åç¨‹
         StartCoroutine(CombatCooldownCoroutine());
     }
 
     private IEnumerator CombatCooldownCoroutine()
     {
         IsCombatCooldownActive = true;
-        Debug.Log($"Õ½¶·ÀäÈ´¿ªÊ¼£¬³ÖĞø {combatCooldownDuration} Ãë¡£");
+        Debug.Log($"æˆ˜æ–—å†·å´å¼€å§‹ï¼ŒæŒç»­ {combatCooldownDuration} ç§’ã€‚");
 
       
         yield return new WaitForSeconds(combatCooldownDuration);
 
         IsCombatCooldownActive = false;
-        Debug.Log("Õ½¶·ÀäÈ´½áÊø£¬¿ÉÒÔÔÙ´Î´¥·¢Õ½¶·¡£");
+        Debug.Log("æˆ˜æ–—å†·å´ç»“æŸï¼Œå¯ä»¥å†æ¬¡è§¦å‘æˆ˜æ–—ã€‚");
     }
 
 
 
-    public void HandleGameOver()
+    private void HandleGameOver()
     {
-        // ÔÚÕâÀïÊµÏÖÄãµÄÓÎÏ·½áÊøÂß¼­
-        // ±ÈÈç£ºÏÔÊ¾½áÊøUI£¬ÔİÍ£ÓÎÏ·£¬Ìá¹©ÖØĞÂ¿ªÊ¼µÄ°´Å¥µÈ
         Debug.Log("--- GAME OVER ---");
-        Time.timeScale = 0; // ¼òµ¥µØÔİÍ£ÓÎÏ·
+  
+        StartCoroutine(GameOverRoutine());
     }
 
+    private IEnumerator GameOverRoutine()
+    {
+        // 1. æ˜¾ç¤º Game Over UI
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError("GameOverPanelæœªåœ¨CombatResultResolverä¸­è®¾ç½®ï¼");
+        }
+
+        // 2. ç­‰å¾…æŒ‡å®šçš„ç§’æ•°
+        Debug.Log($"ç­‰å¾… {gameOverReloadDelay} ç§’åé‡æ–°åŠ è½½æ¸¸æˆ...");
+
+        // âœ¨ ä½¿ç”¨æ— è§†æ—¶é—´ç¼©æ”¾çš„ç­‰å¾…ï¼Œä»¥é˜²ä¸‡ä¸€Time.timeScaleè¢«è®¾ä¸º0
+        float timer = 0f;
+        while (timer < gameOverReloadDelay)
+        {
+            timer += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        Application.Quit();
+    }
 }

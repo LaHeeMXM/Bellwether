@@ -30,6 +30,11 @@ public class PlayerInputManager : MonoBehaviour
     private bool _isZoomingIn = false;
     private Transform _originalFollowTarget;
 
+    [Tooltip("教程Canvas或Panel的GameObject")]
+    public GameObject tutorialPanel;
+
+
+
     void Awake()
     {
         if (Instance == null) Instance = this;
@@ -48,6 +53,15 @@ public class PlayerInputManager : MonoBehaviour
 
     void Update()
     {
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (tutorialPanel != null)
+            {
+                tutorialPanel.SetActive(!tutorialPanel.activeSelf);
+            }
+        }
+
         if (_selectedNode != null)
         {
             HandleMouseScroll();

@@ -52,7 +52,7 @@ public class BattleNode : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
 
     void Awake()
     {
-        _showUnitInfo = GetComponentInChildren<ShowUnitInfo>();
+        //_showUnitInfo = GetComponentInChildren<ShowUnitInfo>();
     }
 
     public void CaculateAttribute(BattleHead head, int index, int newLevel)
@@ -68,7 +68,7 @@ public class BattleNode : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
             finalAttribute += Buff.Execute(nodeList[i].buffName, info);
         }
 
-        _showUnitInfo.SetData(finalAttribute);
+        //_showUnitInfo.SetData(finalAttribute);
         _index = index;
     }
 

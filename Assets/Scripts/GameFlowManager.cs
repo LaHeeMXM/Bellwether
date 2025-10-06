@@ -7,16 +7,29 @@ public class GameFlowManager : MonoBehaviour
 {
     public static GameFlowManager Instance;
 
+    public bool gameHasStarted = false;
+    public GameObject canvas;
+
     void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
-    void Start()
+    void Update()
     {
-        // 游戏开始时，叠加加载主世界
-        StartCoroutine(LoadMainSceneAndInitialize());
+        if (!gameHasStarted && Input.GetMouseButtonDown(0))
+        {
+            gameHasStarted = true;
+            StartCoroutine(LoadMainSceneAndInitialize());
+            canvas.SetActive(false);
+        }
     }
 
     private IEnumerator LoadMainSceneAndInitialize()

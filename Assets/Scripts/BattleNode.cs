@@ -50,7 +50,8 @@ public class BattleNode : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     [HideInInspector]
     //最终属性
     public UnitAttribute finalAttribute;
-    [HideInInspector]
+
+    //[HideInInspector]
     public int Level;
     //刚入队时触发
     public Action<BattleHead, int> onAdd;
@@ -61,37 +62,29 @@ public class BattleNode : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     int _index = 0;
     BattleHead _head;
 
-    public void CaculateAttribute(BattleHead head, int index)
+    public void CaculateAttribute(BattleHead head, int index, int newLevel)
     {
+        // 更新自己缓存的等级
+        this.Level = newLevel;
+
         var nodeList = head.GetList();
         finalAttribute = baseAttribute;
-        // for (int i = index - 1; i >= 0; i--)
-        // {
-        //     finalAttribute += nodeList[i].backwardBonus * nodeList[i].Level;
-        // }
-        // for (int i = index + 1; i < nodeList.Count; i++)
-        // {
-        //     finalAttribute += nodeList[i].forwardBonus * nodeList[i].Level;
-        // }
-        // finalAttribute.Health += selfBonus.Health;
-        // finalAttribute.Attack += selfBonus.Attack;
-        // finalAttribute.Defense += selfBonus.Defense;
+
         for (int i = 0; i < nodeList.Count; i++)
         {
-            //以自身为目标，结算所有其他单位的buff加成
+            // 使用 nodeList[i].Level 来获取Buff提供者的等级
+            // 因为在UpdateNodes循环中，所有节点的Level都已经被正确更新了
             BuffInfo info = new BuffInfo(i, nodeList[i].Level, index, buffParam);
             finalAttribute += Buff.Execute(nodeList[i].buffName, info);
         }
 
         _showUnitInfo.SetData(finalAttribute);
         _index = index;
-        Debug.Log("CaculateAttribute:" + "Level" + Level + "," + finalAttribute.Attack + "," + finalAttribute.Health + "," + finalAttribute.Defense);
     }
 
     void Awake()
     {
         _showUnitInfo = GetComponentInChildren<ShowUnitInfo>();
-        Level = 1;
     }
 
 
@@ -122,14 +115,6 @@ public class BattleNode : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
 
 
-
-
-
-
-
-
-
-
     //获取战斗数据
     public CombatantData GetCombatantData()
     {
@@ -137,7 +122,9 @@ public class BattleNode : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         data.Attack = finalAttribute.Attack;
         data.Defense = finalAttribute.Defense;
         data.Health = finalAttribute.Health;
-        data.Level = Level;
+        data.Level = this.Level; // 使用缓存的等级
+        data.Location = _index;
+
         int assistance = 0;
         int k = 2;
         //计算增援数值
@@ -147,9 +134,12 @@ public class BattleNode : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
             k *= 2;
         }
         data.Assistance = assistance;
+
         data.unitPrefab = sheepPrefab;
         return data;
     }
+
+
     public BattleHead GetHead()
     {
         return _head;

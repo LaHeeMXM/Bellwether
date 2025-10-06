@@ -6,16 +6,92 @@ public class BattleHead : MonoBehaviour
     SnakeHead snakeHead;
     public List<BattleNode> nodeList = new List<BattleNode>();
 
+    // 等级管理
+    private List<int> slotLevels = new List<int>();
+    private int totalLevelUps = 0; // 记录总升级次数
+    private List<int> levelUpSequence = new List<int>(); // 缓存升级顺序
+    private int sequenceNextIndex = 0; // 指向下一个要升级的位置
+
+
+
     void Awake()
     {
         snakeHead = GetComponent<SnakeHead>();
+        // 为至少100个槽位预设1级
+        for (int i = 0; i < 100; i++)
+        {
+            slotLevels.Add(1);
+        }
+        GenerateLevelUpSequence(100); // 预生成升级序列
     }
+
+    public void LevelUp()
+    {
+        if (sequenceNextIndex >= levelUpSequence.Count)
+        {
+            Debug.LogWarning("升级序列已用尽，请考虑生成更长的序列。");
+            return;
+        }
+
+        // 获取下一个要升级的槽位索引 (序列中的值是1-based, 列表是0-based)
+        int slotToUpgrade = levelUpSequence[sequenceNextIndex] - 1;
+
+        // 确保等级列表足够长
+        while (slotLevels.Count <= slotToUpgrade)
+        {
+            slotLevels.Add(1);
+        }
+
+        // 对应槽位等级+1
+        slotLevels[slotToUpgrade]++;
+        totalLevelUps++;
+        sequenceNextIndex++;
+
+        // 升级后必须重新计算所有节点的属性
+        UpdateNodes();
+        Debug.Log($"槽位 {slotToUpgrade + 1} 升级! 新等级: {slotLevels[slotToUpgrade]}");
+    }
+
+    public int GetLevelForSlot(int slotIndex)
+    {
+        if (slotIndex >= 0 && slotIndex < slotLevels.Count)
+        {
+            return slotLevels[slotIndex];
+        }
+        return 1; // 安全返回，默认1级
+    }
+
+
+    public void UpdateNodes()
+    {
+        for (int i = 0; i < nodeList.Count; i++)
+        {
+            // 将该节点所在槽位的等级传递过去
+            nodeList[i].CaculateAttribute(this, i, GetLevelForSlot(i));
+        }
+    }
+
+    private void GenerateLevelUpSequence(int length)
+    {
+        levelUpSequence.Clear();
+        int currentTier = 1;
+        while (levelUpSequence.Count < length)
+        {
+            for (int i = 1; i <= currentTier; i++)
+            {
+                levelUpSequence.Add(i);
+                if (levelUpSequence.Count >= length) break;
+            }
+            currentTier++;
+        }
+    }
+
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.T))
         { 
-            AddSheep("Sheep01");
+            AddSheep("ATK");
         }
     }
 
@@ -93,13 +169,6 @@ public class BattleHead : MonoBehaviour
         nodeList = newList;
     }
 
-    public void UpdateNodes()
-    {
-        for (int i = 0; i < nodeList.Count; i++)
-        {
-            nodeList[i].CaculateAttribute(this, i);
-        }
-    }
 
     public void SwapNodeForward(BattleNode node)
     {

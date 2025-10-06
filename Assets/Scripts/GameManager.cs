@@ -68,16 +68,13 @@ public class GameManager : MonoBehaviour
             enemyController.battleHead.AddSheep(sheepName);
         }
 
-        //// (可选但推荐) 设置所有节点的初始等级
-        //foreach (var battleNode in enemyController.battleHead.GetList())
-        //{
-        //    battleNode.Level = config.initialLevel;
-        //}
-        
-        // 更新一次属性以应用等级
-        //enemyController.battleHead.UpdateNodes();
+        for (int i = 0; i < config.initialLevel; i++)
+        {
+            enemyController.battleHead.LevelUp();
+        }
 
-        Debug.Log("成功生成一条敌人蛇，蛇头为: " + config.nodePrefabNames[0]);
+
+        Debug.Log($"成功生成一条总等级为 {config.initialLevel} 的敌人蛇。");
     }
 
 }

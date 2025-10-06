@@ -9,137 +9,151 @@ public class SnakeHead : MonoBehaviour
 {
     public bool isPlayer;
 
-    public float minSpeed = 5f; 
-    public float headForwardSpeed = 5f;       // 蛇头前进的速度
-    public float headRotationSpeed = 150f;    // 蛇头旋转的角度/秒
-    
-    [Tooltip("身体节点跟随/旋转平滑追赶的因子。值越大，跟随越快。")]
-    public float bodyFollowRate = 10f; 
-    
-    [Tooltip("相邻两个节点中心点之间的理想最小距离（世界单位）")]
+    [Header("速度与加速度")]
+    public float walkSpeed = 2.5f;       // 按下W时的目标速度
+    public float runSpeed = 5f;        // 按下W+空格时的目标速度
+    public float acceleration = 2f;      // 加速度 (单位/秒²)
+    public float deceleration = 4f;      // 减速度 (单位/秒²)
+
+    [Header("操控")]
+    public float headRotationSpeed = 150f;
+
+    [Header("身体跟随")]
+    public float bodyFollowRate = 7f;
     public float absoluteNodeSpacing = 1.0f;
 
     private readonly List<SnakeNode> allNodes = new List<SnakeNode>();
+    private readonly List<Rigidbody> allNodeRigidbodies = new List<Rigidbody>();
+    private float _currentSpeed = 0f; // ✨ 核心：当前蛇头的实际速度
 
-    public float maxSpeed = 10f;
-    public float acc = 0.1f;
-
-    void Start()
-    {
-        // // 确保 SnakeHead GameObject 挂载了 SnakeNode 脚本
-        // SnakeNode headNode = GetComponent<SnakeNode>();
-        // if (headNode == null)
-        // {
-        //     headNode = gameObject.AddComponent<SnakeNode>();
-        //     headNode.size = new Vector3(1f, 1f, 1f); 
-        // }
-        // headNode.segmentIndex = 0; 
-        // allNodes.Add(headNode);
-    }
-    
-    void Update()
+    void FixedUpdate()
     {
         if (!isPlayer) return;
-        if (Input.GetKey(KeyCode.Space))
-        {
-            headForwardSpeed = Mathf.Lerp(headForwardSpeed, maxSpeed, acc *Time.deltaTime);
-        }
-        else
-        {
-            headForwardSpeed = Mathf.Lerp(headForwardSpeed, minSpeed, acc *Time.deltaTime);
-        }
-        // 获取输入量 (move: W, rotate: A/D)
-        (float moveInput, float rotateInput) = HandleInput();
-        UpdateHead(moveInput, rotateInput);
+        if (allNodes.Count == 0) return;
+
+        (float moveInput, float rotateInput, bool isRunning) = HandleInput();
+
+        UpdateSpeed(moveInput, isRunning);
+
+        UpdateHead(rotateInput);
+
         UpdateBodyPositions();
-        
+
+        BroadcastSpeedToAllNodes();
     }
 
-    // 处理 W A D 输入
-    (float move, float rotate) HandleInput()
+    (float move, float rotate, bool running) HandleInput()
     {
-        float move = 0f;
+        float move = Input.GetKey(KeyCode.W) ? 1f : 0f;
         float rotate = 0f;
-        
-        if (Input.GetKey(KeyCode.W)) move = 1f;
         if (Input.GetKey(KeyCode.A)) rotate = -1f;
         else if (Input.GetKey(KeyCode.D)) rotate = 1f;
+        bool running = Input.GetKey(KeyCode.Space);
 
-        return (move, rotate);
+        return (move, rotate, running);
     }
 
-    /// <summary>
-    /// 更新蛇头的位置和旋转。
-    /// </summary>
-    void UpdateHead(float moveInput, float rotateInput)
+
+    void UpdateSpeed(float moveInput, bool isRunning)
     {
-        if(allNodes.Count == 0)
-            return;
+        float targetSpeed = 0f;
+
+        // 如果有前进输入
         if (moveInput > 0)
         {
-            if (rotateInput != 0)
-            {
-                allNodes[0].transform.Rotate(Vector3.up, rotateInput * headRotationSpeed * Time.deltaTime, Space.Self);
-            }
-            // 确保前进方向只在 XZ 平面上
-            Vector3 forwardDirection =  allNodes[0].transform.forward;
-            forwardDirection.y = 0; 
-            
-             allNodes[0].transform.position += forwardDirection.normalized * headForwardSpeed * Time.deltaTime;
+            // 根据是否按住空格，确定目标速度
+            targetSpeed = isRunning ? runSpeed : walkSpeed;
+        }
+
+        // 根据当前速度和目标速度的差距，决定是加速还是减速
+        if (_currentSpeed < targetSpeed)
+        {
+            // 加速
+            _currentSpeed += acceleration * Time.fixedDeltaTime;
+            // 防止超速
+            _currentSpeed = Mathf.Min(_currentSpeed, targetSpeed);
+        }
+        else if (_currentSpeed > targetSpeed)
+        {
+            // 减速
+            _currentSpeed -= deceleration * Time.fixedDeltaTime;
+            // 防止速度低于目标值（特别是减速到0时）
+            _currentSpeed = Mathf.Max(_currentSpeed, targetSpeed);
         }
     }
+
+    void UpdateHead(float rotateInput)
+    {
+        Rigidbody headRigidbody = allNodeRigidbodies[0];
+
+        // 旋转
+        if (_currentSpeed > 0.1f && rotateInput != 0) // 只有在移动时才能转向
+        {
+            Quaternion deltaRotation = Quaternion.Euler(Vector3.up * rotateInput * headRotationSpeed * Time.fixedDeltaTime);
+            headRigidbody.MoveRotation(headRigidbody.rotation * deltaRotation);
+        }
+
+        // 前进 (使用_currentSpeed)
+        Vector3 targetPosition = headRigidbody.position + headRigidbody.transform.forward * _currentSpeed * Time.fixedDeltaTime;
+        headRigidbody.MovePosition(targetPosition);
+    }
+
+    void BroadcastSpeedToAllNodes()
+    {
+        // 蛇头也需要更新自己的动画
+        allNodes[0].GetComponent<SheepAnimation>()?.UpdateMovementAnimation(_currentSpeed);
+
+        // 身体节点的速度可以稍微延迟或打折，以产生更自然的摆动效果
+        // 但最简单的实现是所有节点速度一致
+        for (int i = 1; i < allNodes.Count; i++)
+        {
+            // 身体的速度就是蛇头的速度
+            allNodes[i].GetComponent<SheepAnimation>()?.UpdateMovementAnimation(_currentSpeed);
+        }
+    }
+
 
     void UpdateBodyPositions()
     {
         for (int i = 1; i < allNodes.Count; i++)
         {
-            SnakeNode currentNode = allNodes[i];
-            SnakeNode previousNode = allNodes[i - 1];
+            Rigidbody currentRigidbody = allNodeRigidbodies[i];
+            Rigidbody previousRigidbody = allNodeRigidbodies[i - 1];
 
-            Vector3 currentPos = currentNode.transform.position;
-            Vector3 previousPos = previousNode.transform.position;
-            
+            Vector3 currentPos = currentRigidbody.position;
+            Vector3 previousPos = previousRigidbody.position;
+
             // 1. 位置追赶逻辑 (保持间距)
-            float requiredDistance = absoluteNodeSpacing; 
+            float requiredDistance = absoluteNodeSpacing;
             float distance = Vector3.Distance(currentPos, previousPos);
+
+            Vector3 targetPosition = currentPos; // 默认目标位置是当前位置
 
             if (distance > requiredDistance)
             {
-                // 计算从前一个节点指向当前节点的向量
-                Vector3 directionToCurrent = (currentPos - previousPos).normalized;
-
-                // 目标跟随点：从前一个节点沿着其反方向后退 requiredDistance
-                Vector3 targetFollowPoint = previousPos + directionToCurrent * requiredDistance;
-                
-                // 使用 Lerp 平滑移动到目标点
-                currentNode.transform.position = Vector3.Lerp(
-                    currentPos, 
-                    targetFollowPoint, 
-                    Time.deltaTime * bodyFollowRate
-                );
+                Vector3 directionToPrevious = (previousPos - currentPos).normalized;
+                targetPosition = currentPos + directionToPrevious * (distance - requiredDistance);
             }
-            //确保间距不会被拉得太近，轻微推离
-            else if (distance < requiredDistance * 0.9f) 
+            else if (distance < requiredDistance * 0.9f)
             {
-                 Vector3 separateDirection = (currentPos - previousPos).normalized;
-                 currentNode.transform.position += separateDirection * (requiredDistance * 0.9f - distance) * Time.deltaTime * bodyFollowRate * 0.5f;
+                Vector3 separateDirection = (currentPos - previousPos).normalized;
+                targetPosition = currentPos + separateDirection * (requiredDistance * 0.9f - distance);
             }
 
-            // 目标朝向向量：从当前位置指向前一个位置 (previousPos - currentPos)
-            Vector3 lookVector = previousPos - currentNode.transform.position;
-            
+            currentRigidbody.MovePosition(targetPosition);
+
+            // --- 朝向追赶逻辑 ---
+            Vector3 lookVector = previousPos - currentPos;
             if (lookVector.sqrMagnitude > 0.0001f)
             {
-                lookVector.y = 0; // 确保只在 XZ 平面旋转
-                
                 Quaternion targetRotation = Quaternion.LookRotation(lookVector);
-                
-                // 平滑插值到目标旋转
-                currentNode.transform.rotation = Quaternion.Slerp(
-                    currentNode.transform.rotation, 
-                    targetRotation, 
+                // 使用Slerp计算目标旋转，然后用MoveRotation应用
+                Quaternion newRotation = Quaternion.Slerp(
+                    currentRigidbody.rotation,
+                    targetRotation,
                     Time.deltaTime * bodyFollowRate
                 );
+                currentRigidbody.MoveRotation(newRotation);
             }
         }
     }
@@ -155,31 +169,38 @@ public class SnakeHead : MonoBehaviour
         // 第一个节点（蛇头）的特殊处理
         if (newIndex == 0)
         {
-            // 它的初始位置就是 "Head" 的位置
             newNode.transform.SetParent(transform.parent); // 放在与 "Head" 同级
             newNode.transform.position = transform.position;
             newNode.transform.rotation = transform.rotation;
-            allNodes.Add(newNode);
-            return;
         }
 
         // 后续身体节点的处理
-        SnakeNode lastNode = allNodes[newIndex - 1];
+        else
+        {
+            SnakeNode lastNode = allNodes[newIndex - 1];
 
-        Vector3 newPosition = lastNode.transform.position - lastNode.transform.forward.normalized * absoluteNodeSpacing;
+            Vector3 newPosition = lastNode.transform.position - lastNode.transform.forward.normalized * absoluteNodeSpacing;
 
-        newNode.transform.SetParent(transform.parent); // 放在与 "Head" 同级
-        newNode.transform.position = newPosition;
-        newNode.transform.rotation = lastNode.transform.rotation;
+            newNode.transform.SetParent(transform.parent); // 放在与 "Head" 同级
+            newNode.transform.position = newPosition;
+            newNode.transform.rotation = lastNode.transform.rotation;
+        }
 
         allNodes.Add(newNode);
+        allNodeRigidbodies.Add(newNode.GetComponent<Rigidbody>());
     }
 
 
 
     public void RemoveNodeFromList(SnakeNode nodeToRemove)
     {
-        allNodes.Remove(nodeToRemove);
+        int index = allNodes.IndexOf(nodeToRemove);
+        if (index != -1)
+        {
+            allNodes.RemoveAt(index);
+            // 移除Rigidbody引用
+            allNodeRigidbodies.RemoveAt(index);
+        }
     }
 
     public List<SnakeNode> GetAllNodes()

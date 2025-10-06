@@ -113,7 +113,7 @@ public class BattleHead : MonoBehaviour
         }
 
         battleNode.sheepPrefab = sheepPrefab;
-        battleNode.sheepName = sheepName; // 确保sheepName也被记录
+        //battleNode.sheepName = sheepName; // 确保sheepName也被记录
         AddNode(battleNode, snakeNode);
     }
 

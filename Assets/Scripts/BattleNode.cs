@@ -26,45 +26,37 @@ public class UnitAttribute
     }
 }
 
-public class BattleNode : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+public class BattleNode : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [HideInInspector]
     public GameObject sheepPrefab;
 
     public string sheepName;
     public string buffName;
-
     public BuffParams buffParam;
 
-    //基础属性
     [SerializeField]
     private UnitAttribute baseAttribute;
-    // //前向增益,给所有前方节点(索引小于自身)提供增益
-    // public UnitAttribute forwardBonus;
-    // //后向增益,给所有后方节点(索引大于自身)提供增益
-    // public UnitAttribute backwardBonus;
-    // //自身增益
-    // public UnitAttribute selfBonus;
-
 
     [HideInInspector]
-    //最终属性
     public UnitAttribute finalAttribute;
-
-    //[HideInInspector]
+    [HideInInspector]
     public int Level;
-    //刚入队时触发
+
     public Action<BattleHead, int> onAdd;
-    //离队时触发
     public Action<BattleHead> onRemove;
 
     ShowUnitInfo _showUnitInfo;
     int _index = 0;
     BattleHead _head;
 
+    void Awake()
+    {
+        _showUnitInfo = GetComponentInChildren<ShowUnitInfo>();
+    }
+
     public void CaculateAttribute(BattleHead head, int index, int newLevel)
     {
-        // 更新自己缓存的等级
         this.Level = newLevel;
 
         var nodeList = head.GetList();
@@ -72,8 +64,6 @@ public class BattleNode : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
         for (int i = 0; i < nodeList.Count; i++)
         {
-            // 使用 nodeList[i].Level 来获取Buff提供者的等级
-            // 因为在UpdateNodes循环中，所有节点的Level都已经被正确更新了
             BuffInfo info = new BuffInfo(i, nodeList[i].Level, index, buffParam);
             finalAttribute += Buff.Execute(nodeList[i].buffName, info);
         }
@@ -82,40 +72,6 @@ public class BattleNode : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         _index = index;
     }
 
-    void Awake()
-    {
-        _showUnitInfo = GetComponentInChildren<ShowUnitInfo>();
-    }
-
-
-    // 当鼠标指针按下
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        if (!IsPlayer()) return;
-
-        if (eventData.button == PointerEventData.InputButton.Left)
-        {
-            Debug.Log("点击了节点: " + gameObject.name + " at index " + _index);
-            // 通知输入管理器，我们开始了一个换位操作
-            PlayerInputManager.Instance.StartNodeSwap(this);
-        }
-    }
-
-    // 当鼠标指针抬起
-    public void OnPointerUp(PointerEventData eventData)
-    {
-        if (!IsPlayer()) return;
-
-        if (eventData.button == PointerEventData.InputButton.Left)
-        {
-            // 通知输入管理器，我们结束了换位操作
-            PlayerInputManager.Instance.EndNodeSwap();
-        }
-    }
-
-
-
-    //获取战斗数据
     public CombatantData GetCombatantData()
     {
         CombatantData data = new CombatantData();
@@ -123,43 +79,78 @@ public class BattleNode : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         data.Attack = finalAttribute.Attack;
         data.Defense = finalAttribute.Defense;
         data.Health = finalAttribute.Health;
-        data.Level = this.Level; // 使用缓存的等级
+        data.Level = this.Level;
         data.Location = _index;
 
         int assistance = 0;
-        int k = 2;
-        //计算增援数值
-
-        for (int i = _index+1; i < _head.GetList().Count; i++)
+        if (_head != null && _head.GetList() != null)
         {
-            assistance += _head.GetList()[i].finalAttribute.Attack / k;
-            k *= 2;
+            var headList = _head.GetList();
+            int k = 2;
+            for (int i = _index + 1; i < headList.Count; i++)
+            {
+                assistance += headList[i].finalAttribute.Attack / k;
+                k *= 2;
+            }
         }
         data.Assistance = assistance;
-
         data.unitPrefab = sheepPrefab;
         return data;
     }
-
 
     public BattleHead GetHead()
     {
         return _head;
     }
+
     public void SetHead(BattleHead head)
     {
         _head = head;
     }
+
     public int GetIndex()
     {
         return _index;
     }
+
     public bool IsHead()
     {
         return _index == 0;
     }
+
     public bool IsPlayer()
-    { 
+    {
+        if (_head == null) return false;
         return _head.isPlayer;
     }
+
+    #region Input Events (✨ 核心修正区域 ✨)
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (!IsPlayer() || eventData.button != PointerEventData.InputButton.Left) return;
+
+        PlayerInputManager.Instance.OnNodeClicked(this);
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (!IsPlayer() || eventData.button != PointerEventData.InputButton.Left) return;
+
+        PlayerInputManager.Instance.OnNodeReleased();
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        UIMainManager.Instance.ShowTooltip(this);
+        PlayerInputManager.Instance.OnNodeHoverEnter(this);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        UIMainManager.Instance.HideTooltip();
+        PlayerInputManager.Instance.OnNodeHoverExit(this);
+    }
+
+    #endregion
 }

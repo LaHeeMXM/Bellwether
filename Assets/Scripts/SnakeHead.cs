@@ -208,7 +208,7 @@ public class SnakeHead : MonoBehaviour
         return allNodes;
     }
 
-    // ✨ 瞬时交换Transform以提供即时视觉反馈
+    // 瞬时交换Transform以提供即时视觉反馈
     public void SwapNodeTransforms(int index1, int index2)
     {
         if (index1 < 0 || index1 >= allNodes.Count || index2 < 0 || index2 >= allNodes.Count)

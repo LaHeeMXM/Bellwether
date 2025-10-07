@@ -46,16 +46,19 @@ public class PlayerController : MonoBehaviour
             battleHead.AddSheep("ATK");
             cineCamera.Follow = snakeHead.GetAllNodes()[0].transform;
 
-            if (snakeHead.isPlayer && snakeHead.GetAllNodes().Count > 0)
-            {
-                cineCamera.Follow = snakeHead.GetAllNodes()[0].transform;
-            }
+
         }
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (!PlayerInputManager.Instance.isSelecting)
+        {
+            if (snakeHead.isPlayer && snakeHead.GetAllNodes().Count > 0)
+            {
+                cineCamera.Follow = snakeHead.GetAllNodes()[0].transform;
+            }
+        }
     }
 }

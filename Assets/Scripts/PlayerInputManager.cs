@@ -8,7 +8,7 @@ public class PlayerInputManager : MonoBehaviour
     public static PlayerInputManager Instance;
 
     [Header("时间控制")]
-    public float slowMotionTimeScale = 0.2f;
+    public float slowMotionTimeScale = 0.8f;
 
     [Header("镜头控制")]
     [Tooltip("在调整阶段，镜头要拉近的目标视野大小(Field of View)")]
@@ -24,6 +24,7 @@ public class PlayerInputManager : MonoBehaviour
     private BattleNode _selectedNode = null;
     private BattleNode _hoveredNode = null;
     private float _originalTimeScale = 1.0f;
+    public bool isSelecting = false;
 
     private CinemachineVirtualCamera _cineCamera;
     private float _originalFOV;
@@ -78,6 +79,7 @@ public class PlayerInputManager : MonoBehaviour
         _selectedNode = node;
         _hoveredNode = null;
 
+        isSelecting = true;
         StartAdjustModeEffects();
     }
 
@@ -85,6 +87,7 @@ public class PlayerInputManager : MonoBehaviour
     {
         if (_selectedNode != null)
         {
+            isSelecting = false;
             EndAdjustModeEffects();
 
             _selectedNode = null;
